@@ -3,7 +3,7 @@
 ## TASK-001: Add repository overview README
 
 FAW: on
-Status: IN_PROGRESS
+Status: DONE
 
 Summary:
 
@@ -14,6 +14,6 @@ Summary:
 
 Acceptance:
 
-- [ ] Root README describing the repository purpose and structure exists.
-- [ ] README links to `AGENTS.md` and this task list for FAW context.
-- [ ] Task marked `DONE` after merge.
+- [x] Root README describing the repository purpose and structure exists.
+- [x] README links to `AGENTS.md` and this task list for FAW context.
+- [x] Task marked `DONE` after merge.
