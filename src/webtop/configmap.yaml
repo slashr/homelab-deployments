@@ -13,9 +13,9 @@ data:
     cat > /usr/local/bin/mmover.sh << 'SCRIPT'
     #!/bin/bash
     export DISPLAY=:1
-    xdotool mousemove_relative -- 1 1
-    sleep 0.1
-    xdotool mousemove_relative -- -1 -1
+    xdotool mousemove_relative -- 50 50
+    sleep 0.2
+    xdotool mousemove_relative -- -50 -50
     SCRIPT
     chmod +x /usr/local/bin/mmover.sh
 
