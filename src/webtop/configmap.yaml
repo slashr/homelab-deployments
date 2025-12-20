@@ -13,17 +13,13 @@ data:
     cat > /usr/local/bin/mmover.sh << 'SCRIPT'
     #!/bin/bash
     export DISPLAY=:1
-    # Get current position using xdotool --shell
     eval $(xdotool getmouselocation --shell)
-    # Move slightly and back
     xdotool mousemove $((X+50)) $((Y+50))
-    sleep 0.2
-    xdotool mousemove $X $Y
     SCRIPT
     chmod +x /usr/local/bin/mmover.sh
 
-    # Add cron job to run every 1 minute (Alpine crontab format)
-    (crontab -l 2>/dev/null | grep -v mmover; echo "* * * * * /usr/local/bin/mmover.sh") | crontab -
+    # Add cron job to run every 5 minutes
+    (crontab -l 2>/dev/null | grep -v mmover; echo "*/5 * * * * /usr/local/bin/mmover.sh") | crontab -
 
     # Start crond if not already running (Alpine uses /usr/sbin/crond)
     pgrep crond || /usr/sbin/crond
