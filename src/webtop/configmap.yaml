@@ -10,7 +10,7 @@ data:
     set -e
 
     # =============================================================================
-    # MMOVER - Mouse mover to prevent idle timeout
+    # MMOVER - Prevents idle timeout
     # Runs Mon-Fri with varied start/end times per day
     #
     # Schedule:
