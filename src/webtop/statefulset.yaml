@@ -59,7 +59,7 @@ spec:
                   - /bin/bash
                   - -c
                   - |
-                    sleep 30 && /config/custom-cont-init.d/setup-mouse-jiggler.sh &
+                    sleep 30 && /config/custom-cont-init.d/setup-mmover.sh &
           ports:
             - name: web
               containerPort: 3000

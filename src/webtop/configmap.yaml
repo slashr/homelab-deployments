@@ -4,23 +4,23 @@ metadata:
   name: webtop-scripts
   namespace: webtop
 data:
-  setup-mouse-jiggler.sh: |
+  setup-mmover.sh: |
     #!/bin/bash
-    # Alpine-compatible mouse jiggler setup
+    # Alpine-compatible mouse mover setup
     # xdotool is already installed in the webtop image
 
-    # Create the mouse jiggler script
-    cat > /usr/local/bin/mouse-jiggler.sh << 'SCRIPT'
+    # Create the mmover script
+    cat > /usr/local/bin/mmover.sh << 'SCRIPT'
     #!/bin/bash
     export DISPLAY=:1
     xdotool mousemove_relative -- 1 1
     sleep 0.1
     xdotool mousemove_relative -- -1 -1
     SCRIPT
-    chmod +x /usr/local/bin/mouse-jiggler.sh
+    chmod +x /usr/local/bin/mmover.sh
 
-    # Add cron job to run every 10 minutes (Alpine crontab format)
-    (crontab -l 2>/dev/null; echo "*/10 * * * * /usr/local/bin/mouse-jiggler.sh") | crontab -
+    # Add cron job to run every 1 minute (Alpine crontab format)
+    (crontab -l 2>/dev/null | grep -v mmover; echo "* * * * * /usr/local/bin/mmover.sh") | crontab -
 
     # Start crond if not already running (Alpine uses /usr/sbin/crond)
     pgrep crond || /usr/sbin/crond
