@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: slack
-  namespace: slack
+  name: webtop
+  namespace: webtop
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
-    matchLabels: { app: slack }
+    matchLabels: { app: webtop }
   template:
     metadata:
-      labels: { app: slack }
+      labels: { app: webtop }
     spec:
       containers:
-        - name: slack
+        - name: webtop
           image: lscr.io/linuxserver/webtop:latest
           ports:
             - name: web
@@ -35,9 +35,9 @@ spec:
               memory: "1536Mi"
               cpu: "2000m"
           volumeMounts:
-            - name: slack-data
+            - name: webtop-data
               mountPath: /config
       volumes:
-        - name: slack-data
+        - name: webtop-data
           persistentVolumeClaim:
-            claimName: slack-data
+            claimName: webtop-data

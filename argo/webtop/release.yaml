@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: slack
+  name: webtop
   namespace: argo-cd
 spec:
   destination:
-    namespace: slack
+    namespace: webtop
     server: 'https://kubernetes.default.svc'
   syncPolicy:
     automated:
@@ -17,4 +17,4 @@ spec:
   source:
     targetRevision: HEAD
     repoURL: 'https://github.com/slashr/homelab-deployments.git'
-    path: src/slack
+    path: src/webtop
