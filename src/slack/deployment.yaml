@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: slack
-          image: lscr.io/linuxserver/webtop:alpine-xfce
+          image: lscr.io/linuxserver/webtop:latest
           ports:
             - name: web
               containerPort: 3000
