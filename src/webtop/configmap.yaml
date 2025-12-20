@@ -18,8 +18,31 @@ data:
     SCRIPT
     chmod +x /usr/local/bin/mmover.sh
 
-    # Add cron job to run every 5 minutes
-    (crontab -l 2>/dev/null | grep -v mmover; echo "*/5 * * * * /usr/local/bin/mmover.sh") | crontab -
+    # Add cron jobs with varied schedules per day (Mon-Fri)
+    crontab -l 2>/dev/null | grep -v mmover > /tmp/crontab.tmp || true
+    cat >> /tmp/crontab.tmp << 'CRON'
+    # Mon 8:37-18:12
+    37,42,47,52,57 8 * * 1 /usr/local/bin/mmover.sh
+    */5 9-17 * * 1 /usr/local/bin/mmover.sh
+    0,5,10 18 * * 1 /usr/local/bin/mmover.sh
+    # Tue 9:08-17:42
+    8,13,18,23,28,33,38,43,48,53,58 9 * * 2 /usr/local/bin/mmover.sh
+    */5 10-16 * * 2 /usr/local/bin/mmover.sh
+    0,5,10,15,20,25,30,35,40 17 * * 2 /usr/local/bin/mmover.sh
+    # Wed 8:52-18:27
+    52,57 8 * * 3 /usr/local/bin/mmover.sh
+    */5 9-17 * * 3 /usr/local/bin/mmover.sh
+    0,5,10,15,20,25 18 * * 3 /usr/local/bin/mmover.sh
+    # Thu 9:23-17:38
+    23,28,33,38,43,48,53,58 9 * * 4 /usr/local/bin/mmover.sh
+    */5 10-16 * * 4 /usr/local/bin/mmover.sh
+    0,5,10,15,20,25,30,35 17 * * 4 /usr/local/bin/mmover.sh
+    # Fri 8:45-18:05
+    45,50,55 8 * * 5 /usr/local/bin/mmover.sh
+    */5 9-17 * * 5 /usr/local/bin/mmover.sh
+    0,5 18 * * 5 /usr/local/bin/mmover.sh
+    CRON
+    crontab /tmp/crontab.tmp
 
     # Start crond if not already running (Alpine uses /usr/sbin/crond)
     pgrep crond || /usr/sbin/crond
