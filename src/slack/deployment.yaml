@@ -13,6 +13,8 @@ spec:
     metadata:
       labels: { app: slack }
     spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
       containers:
         - name: slack
           image: kasmweb/slack:1.16.0
