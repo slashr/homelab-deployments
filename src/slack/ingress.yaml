@@ -4,15 +4,12 @@ metadata:
   name: slack
   namespace: slack
 spec:
-  ingressClassName: traefik
-  rules:
-    - host: slack.shrub.dev
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: slack
-                port:
-                  number: 3000
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: slack
+      port:
+        number: 3000
+  tls:
+    - hosts:
+        - slack
