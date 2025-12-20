@@ -50,11 +50,10 @@ spec:
               value: "Europe/Amsterdam"
           resources:
             requests:
-              memory: "512Mi"
+              memory: "1Gi"
               cpu: "250m"
             limits:
-              memory: "1536Mi"
-              cpu: "2000m"
+              memory: "3Gi"
           volumeMounts:
             - name: webtop-data
               mountPath: /config
