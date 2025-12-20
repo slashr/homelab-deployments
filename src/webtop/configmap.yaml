@@ -13,9 +13,12 @@ data:
     cat > /usr/local/bin/mmover.sh << 'SCRIPT'
     #!/bin/bash
     export DISPLAY=:1
-    xdotool mousemove_relative -- 50 50
+    # Get current position using xdotool --shell
+    eval $(xdotool getmouselocation --shell)
+    # Move slightly and back
+    xdotool mousemove $((X+50)) $((Y+50))
     sleep 0.2
-    xdotool mousemove_relative -- -50 -50
+    xdotool mousemove $X $Y
     SCRIPT
     chmod +x /usr/local/bin/mmover.sh
 
