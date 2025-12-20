@@ -1,18 +1,27 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: webtop
   namespace: webtop
 spec:
+  serviceName: webtop
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels: { app: webtop }
   template:
     metadata:
       labels: { app: webtop }
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - stanley-arm1
+                      - phyllis-arm2
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:latest
@@ -37,7 +46,12 @@ spec:
           volumeMounts:
             - name: webtop-data
               mountPath: /config
-      volumes:
-        - name: webtop-data
-          persistentVolumeClaim:
-            claimName: webtop-data
+  volumeClaimTemplates:
+    - metadata:
+        name: webtop-data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 5Gi
