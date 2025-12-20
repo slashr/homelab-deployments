@@ -4,73 +4,98 @@ metadata:
   name: webtop-scripts
   namespace: webtop
 data:
+  # Main setup script - creates helper scripts and configures cron
   setup-mmover.sh: |
     #!/bin/bash
-    # Alpine-compatible mmover setup
-    # xdotool is already installed in the webtop image
+    set -e
 
-    # Create the mmover script
-    cat > /usr/local/bin/mmover.sh << 'SCRIPT'
+    # =============================================================================
+    # MMOVER - Mouse mover to prevent idle timeout
+    # Runs Mon-Fri with varied start/end times per day
+    #
+    # Schedule:
+    #   Day   Start   End
+    #   Mon   08:37   18:12
+    #   Tue   09:08   17:42
+    #   Wed   08:52   18:27
+    #   Thu   09:23   17:38
+    #   Fri   08:45   18:05
+    # =============================================================================
+
+    # --- Helper Scripts ---
+
+    cat > /usr/local/bin/mmover.sh << 'EOF'
     #!/bin/bash
     export DISPLAY=:1
     eval $(xdotool getmouselocation --shell)
     xdotool mousemove $((X+50)) $((Y+50))
-    SCRIPT
-    chmod +x /usr/local/bin/mmover.sh
+    EOF
 
-    # Create chromium-maximize script
-    cat > /usr/local/bin/chromium-maximize.sh << 'SCRIPT'
+    cat > /usr/local/bin/chromium-maximize.sh << 'EOF'
     #!/bin/bash
     export DISPLAY=:1
     WIN=$(xdotool search --name "Chromium" | head -1)
     [ -n "$WIN" ] && xdotool windowactivate "$WIN" && xdotool windowsize "$WIN" 100% 100%
-    SCRIPT
-    chmod +x /usr/local/bin/chromium-maximize.sh
+    EOF
 
-    # Create chromium-minimize script
-    cat > /usr/local/bin/chromium-minimize.sh << 'SCRIPT'
+    cat > /usr/local/bin/chromium-minimize.sh << 'EOF'
     #!/bin/bash
     export DISPLAY=:1
     WIN=$(xdotool search --name "Chromium" | head -1)
     [ -n "$WIN" ] && xdotool windowminimize "$WIN"
-    SCRIPT
+    EOF
+
+    chmod +x /usr/local/bin/mmover.sh
+    chmod +x /usr/local/bin/chromium-maximize.sh
     chmod +x /usr/local/bin/chromium-minimize.sh
 
-    # Add cron jobs with varied schedules per day (Mon-Fri)
+    # --- Cron Schedule ---
+
     crontab -l 2>/dev/null | grep -v -E 'mmover|chromium' > /tmp/crontab.tmp || true
+
     cat >> /tmp/crontab.tmp << 'CRON'
-    # Mon 8:37-18:12
-    37 8 * * 1 /usr/local/bin/chromium-maximize.sh
-    37,42,47,52,57 8 * * 1 /usr/local/bin/mmover.sh
-    */5 9-17 * * 1 /usr/local/bin/mmover.sh
-    0,5,10 18 * * 1 /usr/local/bin/mmover.sh
-    12 18 * * 1 /usr/local/bin/chromium-minimize.sh
-    # Tue 9:08-17:42
-    8 9 * * 2 /usr/local/bin/chromium-maximize.sh
-    8,13,18,23,28,33,38,43,48,53,58 9 * * 2 /usr/local/bin/mmover.sh
-    */5 10-16 * * 2 /usr/local/bin/mmover.sh
-    0,5,10,15,20,25,30,35,40 17 * * 2 /usr/local/bin/mmover.sh
-    42 17 * * 2 /usr/local/bin/chromium-minimize.sh
-    # Wed 8:52-18:27
-    52 8 * * 3 /usr/local/bin/chromium-maximize.sh
-    52,57 8 * * 3 /usr/local/bin/mmover.sh
-    */5 9-17 * * 3 /usr/local/bin/mmover.sh
-    0,5,10,15,20,25 18 * * 3 /usr/local/bin/mmover.sh
-    27 18 * * 3 /usr/local/bin/chromium-minimize.sh
-    # Thu 9:23-17:38
-    23 9 * * 4 /usr/local/bin/chromium-maximize.sh
-    23,28,33,38,43,48,53,58 9 * * 4 /usr/local/bin/mmover.sh
-    */5 10-16 * * 4 /usr/local/bin/mmover.sh
-    0,5,10,15,20,25,30,35 17 * * 4 /usr/local/bin/mmover.sh
-    38 17 * * 4 /usr/local/bin/chromium-minimize.sh
-    # Fri 8:45-18:05
-    45 8 * * 5 /usr/local/bin/chromium-maximize.sh
-    45,50,55 8 * * 5 /usr/local/bin/mmover.sh
-    */5 9-17 * * 5 /usr/local/bin/mmover.sh
-    0,5 18 * * 5 /usr/local/bin/mmover.sh
-    5 18 * * 5 /usr/local/bin/chromium-minimize.sh
+    #==============================================================================
+    # MMOVER SCHEDULE (Mon-Fri)
+    # Format: min hour * * day command
+    #==============================================================================
+
+    # MONDAY (08:37 - 18:12)
+    37    8      * * 1  /usr/local/bin/chromium-maximize.sh
+    37-59/5 8    * * 1  /usr/local/bin/mmover.sh
+    */5   9-17   * * 1  /usr/local/bin/mmover.sh
+    0-10/5 18    * * 1  /usr/local/bin/mmover.sh
+    12    18     * * 1  /usr/local/bin/chromium-minimize.sh
+
+    # TUESDAY (09:08 - 17:42)
+    8     9      * * 2  /usr/local/bin/chromium-maximize.sh
+    8-59/5 9     * * 2  /usr/local/bin/mmover.sh
+    */5   10-16  * * 2  /usr/local/bin/mmover.sh
+    0-40/5 17    * * 2  /usr/local/bin/mmover.sh
+    42    17     * * 2  /usr/local/bin/chromium-minimize.sh
+
+    # WEDNESDAY (08:52 - 18:27)
+    52    8      * * 3  /usr/local/bin/chromium-maximize.sh
+    52-59/5 8    * * 3  /usr/local/bin/mmover.sh
+    */5   9-17   * * 3  /usr/local/bin/mmover.sh
+    0-25/5 18    * * 3  /usr/local/bin/mmover.sh
+    27    18     * * 3  /usr/local/bin/chromium-minimize.sh
+
+    # THURSDAY (09:23 - 17:38)
+    23    9      * * 4  /usr/local/bin/chromium-maximize.sh
+    23-59/5 9    * * 4  /usr/local/bin/mmover.sh
+    */5   10-16  * * 4  /usr/local/bin/mmover.sh
+    0-35/5 17    * * 4  /usr/local/bin/mmover.sh
+    38    17     * * 4  /usr/local/bin/chromium-minimize.sh
+
+    # FRIDAY (08:45 - 18:05)
+    45    8      * * 5  /usr/local/bin/chromium-maximize.sh
+    45-59/5 8    * * 5  /usr/local/bin/mmover.sh
+    */5   9-17   * * 5  /usr/local/bin/mmover.sh
+    0-5/5 18     * * 5  /usr/local/bin/mmover.sh
+    5     18     * * 5  /usr/local/bin/chromium-minimize.sh
     CRON
+
     crontab /tmp/crontab.tmp
 
-    # Start crond if not already running (Alpine uses /usr/sbin/crond)
+    # --- Start crond ---
     pgrep crond || /usr/sbin/crond
