@@ -19,7 +19,7 @@ spec:
               service:
                 name: slack
                 port:
-                  number: 6901
+                  number: 3000
   tls:
     - hosts: [slack.shrub.dev]
       secretName: slack-tls

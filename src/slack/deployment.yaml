@@ -13,31 +13,30 @@ spec:
     metadata:
       labels: { app: slack }
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
       containers:
         - name: slack
-          image: kasmweb/slack:1.16.0
+          image: lscr.io/linuxserver/webtop:alpine-xfce
           ports:
             - name: web
-              containerPort: 6901
+              containerPort: 3000
               protocol: TCP
           env:
-            - name: VNC_PW
-              value: "changeme"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: "2Gi"
+              memory: "1536Mi"
               cpu: "2000m"
           volumeMounts:
             - name: slack-data
-              mountPath: /home/kasm-user
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
+              mountPath: /config
       volumes:
         - name: slack-data
           persistentVolumeClaim:

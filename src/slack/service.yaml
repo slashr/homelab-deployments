@@ -10,7 +10,7 @@ spec:
   selector:
     app: slack
   ports:
-    - name: https
-      port: 6901
-      targetPort: 6901
+    - name: http
+      port: 3000
+      targetPort: 3000
       protocol: TCP
