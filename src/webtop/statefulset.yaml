@@ -34,6 +34,9 @@ spec:
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:latest
+          securityContext:
+            seccompProfile:
+              type: Unconfined
           ports:
             - name: web
               containerPort: 3000
@@ -55,6 +58,13 @@ spec:
           volumeMounts:
             - name: webtop-data
               mountPath: /config
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
