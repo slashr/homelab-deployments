@@ -16,5 +16,5 @@ spec:
   project: default
   source:
     targetRevision: HEAD
-    repoURL: 'https://github.com/slashr/app-manifests.git'
+    repoURL: 'https://github.com/slashr/homelab-deployments.git'
     path: src/homelab-map

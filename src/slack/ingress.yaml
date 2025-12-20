@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: slack
+  namespace: slack
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/hostname: slack.shrub.dev
+    external-dns.alpha.kubernetes.io/target: 130.61.64.164
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: slack.shrub.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: slack
+                port:
+                  number: 6901
+  tls:
+    - hosts: [slack.shrub.dev]
+      secretName: slack-tls

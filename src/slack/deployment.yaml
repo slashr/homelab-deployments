@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slack
+  namespace: slack
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: slack }
+  template:
+    metadata:
+      labels: { app: slack }
+    spec:
+      containers:
+        - name: slack
+          image: kasmweb/slack:1.16.0
+          ports:
+            - name: web
+              containerPort: 6901
+              protocol: TCP
+          env:
+            - name: VNC_PW
+              value: "changeme"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          volumeMounts:
+            - name: slack-data
+              mountPath: /home/kasm-user
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+      volumes:
+        - name: slack-data
+          persistentVolumeClaim:
+            claimName: slack-data
