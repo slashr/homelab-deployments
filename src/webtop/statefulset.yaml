@@ -12,6 +12,15 @@ spec:
     metadata:
       labels: { app: webtop }
     spec:
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8
+          - 1.1.1.1
+        searches:
+          - webtop.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
