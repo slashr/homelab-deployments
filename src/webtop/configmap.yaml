@@ -6,8 +6,8 @@ metadata:
 data:
   setup-mouse-jiggler.sh: |
     #!/bin/bash
-    # Install xdotool if not present
-    apt-get update && apt-get install -y xdotool cron
+    # Alpine-compatible mouse jiggler setup
+    # xdotool is already installed in the webtop image
 
     # Create the mouse jiggler script
     cat > /usr/local/bin/mouse-jiggler.sh << 'SCRIPT'
@@ -19,9 +19,8 @@ data:
     SCRIPT
     chmod +x /usr/local/bin/mouse-jiggler.sh
 
-    # Add cron job to run every 10 minutes
-    echo "*/10 * * * * root /usr/local/bin/mouse-jiggler.sh" > /etc/cron.d/mouse-jiggler
-    chmod 644 /etc/cron.d/mouse-jiggler
+    # Add cron job to run every 10 minutes (Alpine crontab format)
+    (crontab -l 2>/dev/null; echo "*/10 * * * * /usr/local/bin/mouse-jiggler.sh") | crontab -
 
-    # Ensure cron is running
-    service cron start || true
+    # Start crond if not already running (Alpine uses /usr/sbin/crond)
+    pgrep crond || /usr/sbin/crond
