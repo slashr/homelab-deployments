@@ -6,7 +6,7 @@ metadata:
 data:
   setup-mmover.sh: |
     #!/bin/bash
-    # Alpine-compatible mouse mover setup
+    # Alpine-compatible mmover setup
     # xdotool is already installed in the webtop image
 
     # Create the mmover script
