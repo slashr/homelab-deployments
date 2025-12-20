@@ -31,6 +31,21 @@ spec:
                     values:
                       - stanley-arm1
                       - phyllis-arm2
+      initContainers:
+        - name: setup-scripts
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /config/custom-cont-init.d
+              cp /scripts/* /config/custom-cont-init.d/
+              chmod +x /config/custom-cont-init.d/*
+          volumeMounts:
+            - name: webtop-data
+              mountPath: /config
+            - name: custom-scripts
+              mountPath: /scripts
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:latest
@@ -61,8 +76,6 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
-            - name: custom-scripts
-              mountPath: /custom-cont-init.d
       volumes:
         - name: dshm
           emptyDir:
