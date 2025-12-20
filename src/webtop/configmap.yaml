@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webtop-scripts
+  namespace: webtop
+data:
+  setup-mouse-jiggler.sh: |
+    #!/bin/bash
+    # Install xdotool if not present
+    apt-get update && apt-get install -y xdotool cron
+
+    # Create the mouse jiggler script
+    cat > /usr/local/bin/mouse-jiggler.sh << 'SCRIPT'
+    #!/bin/bash
+    export DISPLAY=:1
+    xdotool mousemove_relative -- 1 1
+    sleep 0.1
+    xdotool mousemove_relative -- -1 -1
+    SCRIPT
+    chmod +x /usr/local/bin/mouse-jiggler.sh
+
+    # Add cron job to run every 10 minutes
+    echo "*/10 * * * * root /usr/local/bin/mouse-jiggler.sh" > /etc/cron.d/mouse-jiggler
+    chmod 644 /etc/cron.d/mouse-jiggler
+
+    # Ensure cron is running
+    service cron start || true

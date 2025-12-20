@@ -61,6 +61,8 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
+            - name: custom-scripts
+              mountPath: /custom-cont-init.d
       volumes:
         - name: dshm
           emptyDir:
@@ -70,6 +72,10 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 512Mi
+        - name: custom-scripts
+          configMap:
+            name: webtop-scripts
+            defaultMode: 0755
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
