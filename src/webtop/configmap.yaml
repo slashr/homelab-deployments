@@ -29,6 +29,13 @@ data:
     export DISPLAY=:1
     eval $(xdotool getmouselocation --shell)
     xdotool mousemove $((X+50)) $((Y+50))
+
+    # Push heartbeat metric to SignOz
+    TS=$(date +%s)000000000
+    curl -sf -X POST "http://signoz-otel-collector.signoz.svc.cluster.local:4318/v1/metrics" \
+      -H "Content-Type: application/json" \
+      -d '{"resourceMetrics":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"mmover"}}]},"scopeMetrics":[{"metrics":[{"name":"mmover.heartbeat","gauge":{"dataPoints":[{"asInt":1,"timeUnixNano":"'"$TS"'"}]}}]}]}]}' \
+      >/dev/null 2>&1 || true
     EOF
 
     cat > /usr/local/bin/chromium-maximize.sh << 'EOF'
