@@ -92,7 +92,7 @@ data:
     HOLIDAYS_2026="0101 0308 0403 0406 0501 0514 0525 1003 1225 1226"
     HOLIDAYS_2027="0101 0308 0326 0329 0501 0506 0517 1003 1225 1226"
 
-    # Vacations (MMDD format)
+    # Vacations (MMDD or MMDD-MMDD range)
     VACATIONS_2025=""
     VACATIONS_2026=""
     VACATIONS_2027=""
@@ -109,10 +109,18 @@ data:
 
     vacations_var="VACATIONS_$year"
     vacations="${!vacations_var:-}"
-    if [[ " $vacations " == *" $mmdd "* ]]; then
-      log "vacation: skipping"
-      exit 0
-    fi
+    for v in $vacations; do
+      if [[ "$v" == *-* ]]; then
+        start="${v%-*}"; end="${v#*-}"
+        if [[ "$mmdd" -ge "$start" && "$mmdd" -le "$end" ]]; then
+          log "vacation: skipping"
+          exit 0
+        fi
+      elif [[ "$v" == "$mmdd" ]]; then
+        log "vacation: skipping"
+        exit 0
+      fi
+    done
 
     # Daily randomized schedule
     day_seed=$(date +%Y%m%d)
