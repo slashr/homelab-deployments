@@ -11,10 +11,10 @@ data:
 
     # =============================================================================
     # MMOVER - Prevents idle timeout
-    # Runs Mon-Fri with varied start/end times and lunch breaks
+    # Runs Mon-Fri with varied start/end times and midday pause
     #
     # Schedule:
-    #   Day   Start   Lunch Break    End
+    #   Day   Start   Pause          End
     #   Mon   08:37   12:22-13:28    18:12
     #   Tue   09:08   12:31-13:35    17:42
     #   Wed   08:52   12:18-13:24    18:27
@@ -64,7 +64,7 @@ data:
     # Format: min hour * * day command
     #==============================================================================
 
-    # MONDAY (08:37 - 18:12, lunch 12:22-13:28)
+    # MONDAY (08:37 - 18:12, pause 12:22-13:28)
     37    8      * * 1  /usr/local/bin/chromium-open.sh
     37-59/5 8    * * 1  /usr/local/bin/mmover.sh
     */5   9-11   * * 1  /usr/local/bin/mmover.sh
@@ -74,7 +74,7 @@ data:
     0-10/5 18    * * 1  /usr/local/bin/mmover.sh
     12    18     * * 1  /usr/local/bin/chromium-close.sh
 
-    # TUESDAY (09:08 - 17:42, lunch 12:31-13:35)
+    # TUESDAY (09:08 - 17:42, pause 12:31-13:35)
     8     9      * * 2  /usr/local/bin/chromium-open.sh
     8-59/5 9     * * 2  /usr/local/bin/mmover.sh
     */5   10-11  * * 2  /usr/local/bin/mmover.sh
@@ -84,7 +84,7 @@ data:
     0-40/5 17    * * 2  /usr/local/bin/mmover.sh
     42    17     * * 2  /usr/local/bin/chromium-close.sh
 
-    # WEDNESDAY (08:52 - 18:27, lunch 12:18-13:24)
+    # WEDNESDAY (08:52 - 18:27, pause 12:18-13:24)
     52    8      * * 3  /usr/local/bin/chromium-open.sh
     52-59/5 8    * * 3  /usr/local/bin/mmover.sh
     */5   9-11   * * 3  /usr/local/bin/mmover.sh
@@ -94,7 +94,7 @@ data:
     0-25/5 18    * * 3  /usr/local/bin/mmover.sh
     27    18     * * 3  /usr/local/bin/chromium-close.sh
 
-    # THURSDAY (09:23 - 17:38, lunch 12:34-13:38)
+    # THURSDAY (09:23 - 17:38, pause 12:34-13:38)
     23    9      * * 4  /usr/local/bin/chromium-open.sh
     23-59/5 9    * * 4  /usr/local/bin/mmover.sh
     */5   10-11  * * 4  /usr/local/bin/mmover.sh
@@ -104,7 +104,7 @@ data:
     0-35/5 17    * * 4  /usr/local/bin/mmover.sh
     38    17     * * 4  /usr/local/bin/chromium-close.sh
 
-    # FRIDAY (08:45 - 18:05, lunch 12:26-13:31)
+    # FRIDAY (08:45 - 18:05, pause 12:26-13:31)
     45    8      * * 5  /usr/local/bin/chromium-open.sh
     45-59/5 8    * * 5  /usr/local/bin/mmover.sh
     */5   9-11   * * 5  /usr/local/bin/mmover.sh
