@@ -6,7 +6,7 @@ metadata:
 data:
   # =============================================================================
   # MMOVER - Prevents idle timeout
-  # Runs Mon-Fri with daily randomized times, excludes Berlin public holidays
+  # Runs Mon-Fri with daily randomized times, excludes holidays and vacations
   #
   # Ranges:
   #   Start: 08:30 - 09:30
@@ -87,24 +87,29 @@ data:
     dow="$(date +%u)"
     [[ "$dow" -gt 5 ]] && exit 0
 
-    # Berlin public holidays (update yearly)
+    # Public holidays (MMDD format)
     HOLIDAYS_2025="0101 0308 0418 0421 0501 0529 0609 1003 1225 1226"
     HOLIDAYS_2026="0101 0308 0403 0406 0501 0514 0525 1003 1225 1226"
     HOLIDAYS_2027="0101 0308 0326 0329 0501 0506 0517 1003 1225 1226"
 
+    # Vacations (MMDD format)
+    VACATIONS_2025=""
+    VACATIONS_2026=""
+    VACATIONS_2027=""
+
     year=$(date +%Y)
     mmdd=$(date +%m%d)
+
     holidays_var="HOLIDAYS_$year"
     holidays="${!holidays_var:-}"
-
     if [[ " $holidays " == *" $mmdd "* ]]; then
-      log "holiday: skipping (Berlin public holiday)"
+      log "holiday: skipping"
       exit 0
     fi
 
-    # Personal vacations - /config/vacations.txt (YYYY-MM-DD per line)
-    VAC_FILE="/config/vacations.txt"
-    if [[ -f "$VAC_FILE" ]] && grep -q "^$(date +%Y-%m-%d)$" "$VAC_FILE" 2>/dev/null; then
+    vacations_var="VACATIONS_$year"
+    vacations="${!vacations_var:-}"
+    if [[ " $vacations " == *" $mmdd "* ]]; then
       log "vacation: skipping"
       exit 0
     fi
