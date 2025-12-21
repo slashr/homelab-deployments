@@ -34,7 +34,7 @@ spec:
                       - phyllis-arm2
       containers:
         - name: webtop
-          image: lscr.io/linuxserver/webtop:latest
+          image: lscr.io/linuxserver/webtop:8081e48e-ls272
           securityContext:
             seccompProfile:
               type: Unconfined
