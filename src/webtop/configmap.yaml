@@ -94,7 +94,7 @@ data:
 
     # Vacations (MMDD or MMDD-MMDD range)
     VACATIONS_2025=""
-    VACATIONS_2026=""
+    VACATIONS_2026="0107 0320-0406"
     VACATIONS_2027=""
 
     year=$(date +%Y)
