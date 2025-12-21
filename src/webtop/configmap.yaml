@@ -4,7 +4,6 @@ metadata:
   name: webtop-scripts
   namespace: webtop
 data:
-  # Main setup script - creates helper scripts and configures cron
   setup-mmover.sh: |
     #!/bin/bash
     set -e
@@ -41,7 +40,6 @@ data:
     cat > /usr/local/bin/chromium-open.sh << 'EOF'
     #!/bin/bash
     export DISPLAY=:1
-    # Only open if not already running, run as abc user for correct profile
     pgrep -x chromium >/dev/null || su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized &" abc
     EOF
 
@@ -50,69 +48,68 @@ data:
     pkill -x chromium || true
     EOF
 
+    cat > /usr/local/bin/workday-keeper.sh << 'EOF'
+    #!/bin/bash
+    set -euo pipefail
+
+    STATE_FILE="/tmp/workday-keeper.state"
+
+    minutes_since_midnight() {
+      local h m
+      h="$(date +%H)"; m="$(date +%M)"
+      echo $((10#$h * 60 + 10#$m))
+    }
+
+    # Day of week: 1=Mon..5=Fri
+    dow="$(date +%u)"
+    t="$(minutes_since_midnight)"
+
+    # Schedule: start end pause_start pause_end (minutes since midnight)
+    case "$dow" in
+      1) start=$((8*60+37));  end=$((18*60+12)); p1=$((12*60+22)); p2=$((13*60+28)) ;;
+      2) start=$((9*60+8));   end=$((17*60+42)); p1=$((12*60+31)); p2=$((13*60+35)) ;;
+      3) start=$((8*60+52));  end=$((18*60+27)); p1=$((12*60+18)); p2=$((13*60+24)) ;;
+      4) start=$((9*60+23));  end=$((17*60+38)); p1=$((12*60+34)); p2=$((13*60+38)) ;;
+      5) start=$((8*60+45));  end=$((18*60+5));  p1=$((12*60+26)); p2=$((13*60+31)) ;;
+      *) exit 0 ;;
+    esac
+
+    in_work_window=false
+    if (( t >= start && t <= end )); then
+      if ! (( t >= p1 && t < p2 )); then
+        in_work_window=true
+      fi
+    fi
+
+    prev="unknown"
+    [[ -f "$STATE_FILE" ]] && prev="$(cat "$STATE_FILE" || true)"
+
+    if [[ "$in_work_window" == "true" ]]; then
+      if [[ "$prev" != "open" ]]; then
+        /usr/local/bin/chromium-open.sh || true
+        echo "open" > "$STATE_FILE"
+      fi
+      /usr/local/bin/mmover.sh
+    else
+      if [[ "$prev" != "closed" ]]; then
+        /usr/local/bin/chromium-close.sh || true
+        echo "closed" > "$STATE_FILE"
+      fi
+    fi
+    EOF
+
     chmod +x /usr/local/bin/mmover.sh
     chmod +x /usr/local/bin/chromium-open.sh
     chmod +x /usr/local/bin/chromium-close.sh
+    chmod +x /usr/local/bin/workday-keeper.sh
 
     # --- Cron Schedule ---
 
-    crontab -l 2>/dev/null | grep -v -E 'mmover|chromium' > /tmp/crontab.tmp || true
+    crontab -l 2>/dev/null | grep -v -E 'mmover|chromium|workday' > /tmp/crontab.tmp || true
 
     cat >> /tmp/crontab.tmp << 'CRON'
-    #==============================================================================
-    # MMOVER SCHEDULE (Mon-Fri)
-    # Format: min hour * * day command
-    #==============================================================================
-
-    # MONDAY (08:37 - 18:12, pause 12:22-13:28)
-    37    8      * * 1  /usr/local/bin/chromium-open.sh
-    37-59/5 8    * * 1  /usr/local/bin/mmover.sh
-    */5   9-11   * * 1  /usr/local/bin/mmover.sh
-    0-20/5 12    * * 1  /usr/local/bin/mmover.sh
-    28-59/5 13   * * 1  /usr/local/bin/mmover.sh
-    */5   14-17  * * 1  /usr/local/bin/mmover.sh
-    0-10/5 18    * * 1  /usr/local/bin/mmover.sh
-    12    18     * * 1  /usr/local/bin/chromium-close.sh
-
-    # TUESDAY (09:08 - 17:42, pause 12:31-13:35)
-    8     9      * * 2  /usr/local/bin/chromium-open.sh
-    8-59/5 9     * * 2  /usr/local/bin/mmover.sh
-    */5   10-11  * * 2  /usr/local/bin/mmover.sh
-    0-30/5 12    * * 2  /usr/local/bin/mmover.sh
-    35-59/5 13   * * 2  /usr/local/bin/mmover.sh
-    */5   14-16  * * 2  /usr/local/bin/mmover.sh
-    0-40/5 17    * * 2  /usr/local/bin/mmover.sh
-    42    17     * * 2  /usr/local/bin/chromium-close.sh
-
-    # WEDNESDAY (08:52 - 18:27, pause 12:18-13:24)
-    52    8      * * 3  /usr/local/bin/chromium-open.sh
-    52-59/5 8    * * 3  /usr/local/bin/mmover.sh
-    */5   9-11   * * 3  /usr/local/bin/mmover.sh
-    0-15/5 12    * * 3  /usr/local/bin/mmover.sh
-    24-59/5 13   * * 3  /usr/local/bin/mmover.sh
-    */5   14-17  * * 3  /usr/local/bin/mmover.sh
-    0-25/5 18    * * 3  /usr/local/bin/mmover.sh
-    27    18     * * 3  /usr/local/bin/chromium-close.sh
-
-    # THURSDAY (09:23 - 17:38, pause 12:34-13:38)
-    23    9      * * 4  /usr/local/bin/chromium-open.sh
-    23-59/5 9    * * 4  /usr/local/bin/mmover.sh
-    */5   10-11  * * 4  /usr/local/bin/mmover.sh
-    0-30/5 12    * * 4  /usr/local/bin/mmover.sh
-    38-59/5 13   * * 4  /usr/local/bin/mmover.sh
-    */5   14-16  * * 4  /usr/local/bin/mmover.sh
-    0-35/5 17    * * 4  /usr/local/bin/mmover.sh
-    38    17     * * 4  /usr/local/bin/chromium-close.sh
-
-    # FRIDAY (08:45 - 18:05, pause 12:26-13:31)
-    45    8      * * 5  /usr/local/bin/chromium-open.sh
-    45-59/5 8    * * 5  /usr/local/bin/mmover.sh
-    */5   9-11   * * 5  /usr/local/bin/mmover.sh
-    0-25/5 12    * * 5  /usr/local/bin/mmover.sh
-    31-59/5 13   * * 5  /usr/local/bin/mmover.sh
-    */5   14-17  * * 5  /usr/local/bin/mmover.sh
-    0-5/5 18     * * 5  /usr/local/bin/mmover.sh
-    5     18     * * 5  /usr/local/bin/chromium-close.sh
+    # Run workday keeper every 5 minutes on weekdays
+    */5 * * * 1-5 /usr/local/bin/workday-keeper.sh
     CRON
 
     crontab /tmp/crontab.tmp
