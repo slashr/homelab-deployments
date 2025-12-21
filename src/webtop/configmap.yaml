@@ -27,9 +27,34 @@ data:
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /tmp/workday.log > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
     eval $(xdotool getmouselocation --shell)
-    NEW_X=$((X+50)); NEW_Y=$((Y+50))
+
+    # Random distance 20-80px
+    dist=$((20 + RANDOM % 60))
+
+    # Random direction (8 directions)
+    dir=$((RANDOM % 8))
+    case $dir in
+      0) dx=$dist;  dy=0 ;;
+      1) dx=$dist;  dy=$dist ;;
+      2) dx=0;      dy=$dist ;;
+      3) dx=-$dist; dy=$dist ;;
+      4) dx=-$dist; dy=0 ;;
+      5) dx=-$dist; dy=-$dist ;;
+      6) dx=0;      dy=-$dist ;;
+      7) dx=$dist;  dy=-$dist ;;
+    esac
+
+    NEW_X=$((X + dx))
+    NEW_Y=$((Y + dy))
+
+    # Keep within screen bounds (assume 1920x1080 min)
+    (( NEW_X < 10 )) && NEW_X=10
+    (( NEW_Y < 10 )) && NEW_Y=10
+    (( NEW_X > 3000 )) && NEW_X=3000
+    (( NEW_Y > 2000 )) && NEW_Y=2000
+
     xdotool mousemove $NEW_X $NEW_Y
-    log "mmover: moved ($X,$Y) -> ($NEW_X,$NEW_Y)"
+    log "mmover: ($X,$Y) -> ($NEW_X,$NEW_Y)"
 
     TS=$(date +%s)000000000
     curl -sf -X POST "http://signoz-otel-collector.signoz.svc.cluster.local:4318/v1/metrics" \
