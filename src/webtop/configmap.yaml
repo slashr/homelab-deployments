@@ -106,6 +106,13 @@ data:
       exit 0
     fi
 
+    # Personal vacations - edit /config/vacations.txt (one date per line, YYYY-MM-DD)
+    VAC_FILE="/config/vacations.txt"
+    if [[ -f "$VAC_FILE" ]] && grep -q "^$(date +%Y-%m-%d)$" "$VAC_FILE" 2>/dev/null; then
+      log "vacation: skipping"
+      exit 0
+    fi
+
     # Use date as seed for daily randomization
     day_seed=$(date +%Y%m%d)
 
