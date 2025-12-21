@@ -41,8 +41,8 @@ data:
     cat > /usr/local/bin/chromium-open.sh << 'EOF'
     #!/bin/bash
     export DISPLAY=:1
-    # Only open if not already running
-    pgrep -x chromium >/dev/null || chromium --no-sandbox --start-maximized 'https://app.slack.com/client/T3NBJSQTS/C04AR90JPED' &
+    # Only open if not already running, run as abc user for correct profile
+    pgrep -x chromium >/dev/null || su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized 'https://app.slack.com/client/T3NBJSQTS/C04AR90JPED' &" abc
     EOF
 
     cat > /usr/local/bin/chromium-close.sh << 'EOF'
