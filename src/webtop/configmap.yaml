@@ -25,27 +25,42 @@ data:
 
     cat > /usr/local/bin/mmover.sh << 'EOF'
     #!/bin/bash
+    LOG="/tmp/workday.log"
     export DISPLAY=:1
     eval $(xdotool getmouselocation --shell)
-    xdotool mousemove $((X+50)) $((Y+50))
+    NEW_X=$((X+50)); NEW_Y=$((Y+50))
+    xdotool mousemove $NEW_X $NEW_Y
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] mmover: moved ($X,$Y) -> ($NEW_X,$NEW_Y)" >> "$LOG"
 
     # Push heartbeat metric to SignOz
     TS=$(date +%s)000000000
     curl -sf -X POST "http://signoz-otel-collector.signoz.svc.cluster.local:4318/v1/metrics" \
       -H "Content-Type: application/json" \
-      -d '{"resourceMetrics":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"mmover"}}]},"scopeMetrics":[{"metrics":[{"name":"mmover.heartbeat","gauge":{"dataPoints":[{"asInt":1,"timeUnixNano":"'"$TS"'"}]}}]}]}]}' \
+      -d "{\"resourceMetrics\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"mmover\"}}]},\"scopeMetrics\":[{\"metrics\":[{\"name\":\"mmover.heartbeat\",\"gauge\":{\"dataPoints\":[{\"asInt\":1,\"timeUnixNano\":\"$TS\"}]}}]}]}]}" \
       >/dev/null 2>&1 || true
     EOF
 
     cat > /usr/local/bin/chromium-open.sh << 'EOF'
     #!/bin/bash
+    LOG="/tmp/workday.log"
     export DISPLAY=:1
-    pgrep -x chromium >/dev/null || su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized &" abc
+    if pgrep -x chromium >/dev/null; then
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] chromium: already running" >> "$LOG"
+    else
+      su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized &" abc
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] chromium: opened" >> "$LOG"
+    fi
     EOF
 
     cat > /usr/local/bin/chromium-close.sh << 'EOF'
     #!/bin/bash
-    pkill -x chromium || true
+    LOG="/tmp/workday.log"
+    if pgrep -x chromium >/dev/null; then
+      pkill -x chromium
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] chromium: closed" >> "$LOG"
+    else
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] chromium: already closed" >> "$LOG"
+    fi
     EOF
 
     cat > /usr/local/bin/workday-keeper.sh << 'EOF'
