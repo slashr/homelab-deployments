@@ -17,13 +17,9 @@ data:
   setup.sh: |
     #!/bin/bash
     set -e
-    cp /scripts/mmover.sh /scripts/chromium-open.sh /scripts/chromium-close.sh /scripts/workday-keeper.sh /usr/local/bin/
-    chmod +x /usr/local/bin/mmover.sh /usr/local/bin/chromium-open.sh /usr/local/bin/chromium-close.sh /usr/local/bin/workday-keeper.sh
-
     crontab -l 2>/dev/null | grep -v workday > /tmp/crontab.tmp || true
-    echo "*/5 * * * 1-5 /usr/local/bin/workday-keeper.sh" >> /tmp/crontab.tmp
+    echo "*/5 * * * 1-5 /scripts/workday-keeper.sh" >> /tmp/crontab.tmp
     crontab /tmp/crontab.tmp
-
     pgrep crond || /usr/sbin/crond
 
   mmover.sh: |
@@ -150,13 +146,13 @@ data:
 
     if [[ "$in_work_window" == "true" ]]; then
       if [[ "$prev" != "open" ]]; then
-        /usr/local/bin/chromium-open.sh || true
+        /scripts/chromium-open.sh || true
         echo "open" > "$STATE_FILE"
       fi
-      /usr/local/bin/mmover.sh
+      /scripts/mmover.sh
     else
       if [[ "$prev" != "closed" ]]; then
-        /usr/local/bin/chromium-close.sh || true
+        /scripts/chromium-close.sh || true
         echo "closed" > "$STATE_FILE"
       fi
     fi
