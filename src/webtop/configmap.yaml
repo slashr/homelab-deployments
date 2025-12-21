@@ -10,12 +10,15 @@ data:
 
     # =============================================================================
     # MMOVER - Prevents idle timeout
-    # Runs Mon-Fri with daily randomized times
+    # Runs Mon-Fri with daily randomized times, excludes Berlin public holidays
     #
     # Ranges:
     #   Start: 08:30 - 09:30
     #   Pause: 12:15-12:35 to 13:20-13:40
     #   End:   17:30 - 18:30
+    #
+    # Berlin holidays: New Year, Women's Day, Good Friday, Easter Monday,
+    #   Labour Day, Ascension, Whit Monday, Unity Day, Christmas, Boxing Day
     # =============================================================================
 
     # --- Helper Scripts ---
@@ -85,6 +88,23 @@ data:
     # Day of week: 1=Mon..5=Fri
     dow="$(date +%u)"
     [[ "$dow" -gt 5 ]] && exit 0
+
+    # Berlin public holidays (update yearly)
+    # Fixed: Jan 1, Mar 8, May 1, Oct 3, Dec 25-26
+    # Variable (Easter-based): Good Friday, Easter Monday, Ascension, Whit Monday
+    HOLIDAYS_2025="0101 0308 0418 0421 0501 0529 0609 1003 1225 1226"
+    HOLIDAYS_2026="0101 0308 0403 0406 0501 0514 0525 1003 1225 1226"
+    HOLIDAYS_2027="0101 0308 0326 0329 0501 0506 0517 1003 1225 1226"
+
+    year=$(date +%Y)
+    mmdd=$(date +%m%d)
+    holidays_var="HOLIDAYS_$year"
+    holidays="${!holidays_var:-}"
+
+    if [[ " $holidays " == *" $mmdd "* ]]; then
+      log "holiday: skipping (Berlin public holiday)"
+      exit 0
+    fi
 
     # Use date as seed for daily randomization
     day_seed=$(date +%Y%m%d)
