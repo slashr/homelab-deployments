@@ -42,7 +42,7 @@ data:
     #!/bin/bash
     export DISPLAY=:1
     # Only open if not already running
-    pgrep -x chromium >/dev/null || chromium --no-sandbox --start-maximized &
+    pgrep -x chromium >/dev/null || chromium --no-sandbox --start-maximized 'https://app.slack.com/client/T3NBJSQTS/C04AR90JPED' &
     EOF
 
     cat > /usr/local/bin/chromium-close.sh << 'EOF'
