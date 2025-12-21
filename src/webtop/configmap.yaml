@@ -24,7 +24,7 @@ data:
 
   mmover.sh: |
     #!/bin/bash
-    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /tmp/workday.log > /proc/1/fd/1 2>/dev/null || true; }
+    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
     eval $(xdotool getmouselocation --shell)
 
@@ -64,7 +64,7 @@ data:
 
   chromium-open.sh: |
     #!/bin/bash
-    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /tmp/workday.log > /proc/1/fd/1 2>/dev/null || true; }
+    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
     if pgrep -x chromium >/dev/null; then
       log "chromium: already running"
@@ -75,7 +75,7 @@ data:
 
   chromium-close.sh: |
     #!/bin/bash
-    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /tmp/workday.log > /proc/1/fd/1 2>/dev/null || true; }
+    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     if pgrep -x chromium >/dev/null; then
       pkill -x chromium
       log "chromium: closed"
@@ -87,11 +87,10 @@ data:
     #!/bin/bash
     set -euo pipefail
 
-    LOG="/tmp/workday.log"
     STATE_FILE="/tmp/workday-keeper.state"
     SCHEDULE_FILE="/tmp/workday-schedule"
 
-    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG" > /proc/1/fd/1 2>/dev/null || true; }
+    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
 
     minutes_since_midnight() {
       local h m
