@@ -10,15 +10,12 @@ data:
 
     # =============================================================================
     # MMOVER - Prevents idle timeout
-    # Runs Mon-Fri with varied start/end times and midday pause
+    # Runs Mon-Fri with daily randomized times
     #
-    # Schedule:
-    #   Day   Start   Pause          End
-    #   Mon   08:37   12:22-13:28    18:12
-    #   Tue   09:08   12:31-13:35    17:42
-    #   Wed   08:52   12:18-13:24    18:27
-    #   Thu   09:23   12:34-13:38    17:38
-    #   Fri   08:45   12:26-13:31    18:05
+    # Ranges:
+    #   Start: 08:30 - 09:30
+    #   Pause: 12:15-12:35 to 13:20-13:40
+    #   End:   17:30 - 18:30
     # =============================================================================
 
     # --- Helper Scripts ---
@@ -67,7 +64,11 @@ data:
     #!/bin/bash
     set -euo pipefail
 
+    LOG="/tmp/workday.log"
     STATE_FILE="/tmp/workday-keeper.state"
+    SCHEDULE_FILE="/tmp/workday-schedule"
+
+    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG" > /proc/1/fd/1 2>/dev/null || true; }
 
     minutes_since_midnight() {
       local h m
@@ -75,19 +76,34 @@ data:
       echo $((10#$h * 60 + 10#$m))
     }
 
+    # Generate pseudo-random number from seed
+    rand() {
+      local seed=$1 idx=$2 max=$3
+      echo $(( (seed * 31 + idx * 17) % max ))
+    }
+
     # Day of week: 1=Mon..5=Fri
     dow="$(date +%u)"
-    t="$(minutes_since_midnight)"
+    [[ "$dow" -gt 5 ]] && exit 0
 
-    # Schedule: start end pause_start pause_end (minutes since midnight)
-    case "$dow" in
-      1) start=$((8*60+37));  end=$((18*60+12)); p1=$((12*60+22)); p2=$((13*60+28)) ;;
-      2) start=$((9*60+8));   end=$((17*60+42)); p1=$((12*60+31)); p2=$((13*60+35)) ;;
-      3) start=$((8*60+52));  end=$((18*60+27)); p1=$((12*60+18)); p2=$((13*60+24)) ;;
-      4) start=$((9*60+23));  end=$((17*60+38)); p1=$((12*60+34)); p2=$((13*60+38)) ;;
-      5) start=$((8*60+45));  end=$((18*60+5));  p1=$((12*60+26)); p2=$((13*60+31)) ;;
-      *) exit 0 ;;
-    esac
+    # Use date as seed for daily randomization
+    day_seed=$(date +%Y%m%d)
+
+    # Generate today's schedule (consistent throughout the day)
+    # Ranges: start 8:30-9:30, end 17:30-18:30, pause 12:15-12:35 to 13:20-13:40
+    start=$((510 + $(rand $day_seed 1 60)))   # 8:30 + 0-59 min
+    end=$((1050 + $(rand $day_seed 2 60)))    # 17:30 + 0-59 min
+    p1=$((735 + $(rand $day_seed 3 20)))      # 12:15 + 0-19 min
+    p2=$((800 + $(rand $day_seed 4 20)))      # 13:20 + 0-19 min
+
+    # Log schedule once per day
+    today=$(date +%Y-%m-%d)
+    if [[ ! -f "$SCHEDULE_FILE" ]] || [[ "$(cat "$SCHEDULE_FILE" 2>/dev/null)" != "$today" ]]; then
+      log "schedule: start=$(printf '%02d:%02d' $((start/60)) $((start%60))) pause=$(printf '%02d:%02d' $((p1/60)) $((p1%60)))-$(printf '%02d:%02d' $((p2/60)) $((p2%60))) end=$(printf '%02d:%02d' $((end/60)) $((end%60)))"
+      echo "$today" > "$SCHEDULE_FILE"
+    fi
+
+    t="$(minutes_since_midnight)"
 
     in_work_window=false
     if (( t >= start && t <= end )); then
