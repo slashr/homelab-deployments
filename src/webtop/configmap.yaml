@@ -18,7 +18,7 @@ data:
     #!/bin/bash
     set -e
     crontab -l 2>/dev/null | grep -v workday > /tmp/crontab.tmp || true
-    echo "*/5 * * * 1-5 /scripts/workday-keeper.sh" >> /tmp/crontab.tmp
+    echo "*/3 * * * 1-5 /scripts/workday-keeper.sh" >> /tmp/crontab.tmp
     crontab /tmp/crontab.tmp
 
   mmover.sh: |
@@ -26,12 +26,16 @@ data:
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
 
+    # 1. Random delay before action (0-90 seconds jitter)
+    jitter=$((RANDOM % 90))
+    sleep $jitter
+
     # Randomly choose action type: 0=mouse move, 1=scroll, 2=window cycle
     action=$((RANDOM % 3))
 
     case $action in
       0)
-        # Mouse movement
+        # 2. Smooth mouse movement (multiple small steps)
         eval $(xdotool getmouselocation --shell)
         dist=$((20 + RANDOM % 60))
         dir=$((RANDOM % 8))
@@ -51,23 +55,55 @@ data:
         (( NEW_Y < 10 )) && NEW_Y=10
         (( NEW_X > 3000 )) && NEW_X=3000
         (( NEW_Y > 2000 )) && NEW_Y=2000
+
+        # Move in 5-10 small steps with variable delays
+        steps=$((5 + RANDOM % 6))
+        step_dx=$(( (NEW_X - X) / steps ))
+        step_dy=$(( (NEW_Y - Y) / steps ))
+        cur_x=$X
+        cur_y=$Y
+        for _ in $(seq 1 $((steps - 1))); do
+          cur_x=$((cur_x + step_dx))
+          cur_y=$((cur_y + step_dy))
+          xdotool mousemove $cur_x $cur_y
+          # 4. Variable micro-pause (10-50ms)
+          sleep 0.0$((10 + RANDOM % 40))
+        done
         xdotool mousemove $NEW_X $NEW_Y
-        log "mmover: mouse ($X,$Y) -> ($NEW_X,$NEW_Y)"
+        log "mmover: mouse ($X,$Y) -> ($NEW_X,$NEW_Y) [${steps} steps, ${jitter}s jitter]"
         ;;
       1)
-        # Scroll wheel (scroll down then up to stay in place)
+        # 3. Scroll - sometimes one-way, sometimes return
         scroll_amount=$((1 + RANDOM % 3))
-        for _ in $(seq 1 $scroll_amount); do xdotool click 5; done
-        sleep 0.3
-        for _ in $(seq 1 $scroll_amount); do xdotool click 4; done
-        log "mmover: scroll ($scroll_amount lines)"
+        scroll_dir=$((RANDOM % 2))  # 0=down, 1=up
+        return_scroll=$((RANDOM % 3))  # 0=return, 1,2=one-way
+
+        if [[ $scroll_dir -eq 0 ]]; then
+          for _ in $(seq 1 $scroll_amount); do xdotool click 5; done
+        else
+          for _ in $(seq 1 $scroll_amount); do xdotool click 4; done
+        fi
+
+        if [[ $return_scroll -eq 0 ]]; then
+          # 4. Variable pause before scrolling back (0.2-0.8s)
+          sleep 0.$((2 + RANDOM % 6))
+          if [[ $scroll_dir -eq 0 ]]; then
+            for _ in $(seq 1 $scroll_amount); do xdotool click 4; done
+          else
+            for _ in $(seq 1 $scroll_amount); do xdotool click 5; done
+          fi
+          log "mmover: scroll ($scroll_amount lines, return) [${jitter}s jitter]"
+        else
+          log "mmover: scroll ($scroll_amount lines, one-way) [${jitter}s jitter]"
+        fi
         ;;
       2)
         # Window focus cycling (alt+tab twice to return)
         xdotool key alt+Tab
-        sleep 0.5
+        # 4. Variable pause (0.3-1.2s)
+        sleep 0.$((3 + RANDOM % 9))
         xdotool key alt+Tab
-        log "mmover: window cycle"
+        log "mmover: window cycle [${jitter}s jitter]"
         ;;
     esac
 
