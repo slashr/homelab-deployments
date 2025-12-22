@@ -25,35 +25,51 @@ data:
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
-    eval $(xdotool getmouselocation --shell)
 
-    # Random distance 20-80px
-    dist=$((20 + RANDOM % 60))
+    # Randomly choose action type: 0=mouse move, 1=scroll, 2=window cycle
+    action=$((RANDOM % 3))
 
-    # Random direction (8 directions)
-    dir=$((RANDOM % 8))
-    case $dir in
-      0) dx=$dist;  dy=0 ;;
-      1) dx=$dist;  dy=$dist ;;
-      2) dx=0;      dy=$dist ;;
-      3) dx=-$dist; dy=$dist ;;
-      4) dx=-$dist; dy=0 ;;
-      5) dx=-$dist; dy=-$dist ;;
-      6) dx=0;      dy=-$dist ;;
-      7) dx=$dist;  dy=-$dist ;;
+    case $action in
+      0)
+        # Mouse movement
+        eval $(xdotool getmouselocation --shell)
+        dist=$((20 + RANDOM % 60))
+        dir=$((RANDOM % 8))
+        case $dir in
+          0) dx=$dist;  dy=0 ;;
+          1) dx=$dist;  dy=$dist ;;
+          2) dx=0;      dy=$dist ;;
+          3) dx=-$dist; dy=$dist ;;
+          4) dx=-$dist; dy=0 ;;
+          5) dx=-$dist; dy=-$dist ;;
+          6) dx=0;      dy=-$dist ;;
+          7) dx=$dist;  dy=-$dist ;;
+        esac
+        NEW_X=$((X + dx))
+        NEW_Y=$((Y + dy))
+        (( NEW_X < 10 )) && NEW_X=10
+        (( NEW_Y < 10 )) && NEW_Y=10
+        (( NEW_X > 3000 )) && NEW_X=3000
+        (( NEW_Y > 2000 )) && NEW_Y=2000
+        xdotool mousemove $NEW_X $NEW_Y
+        log "mmover: mouse ($X,$Y) -> ($NEW_X,$NEW_Y)"
+        ;;
+      1)
+        # Scroll wheel (scroll down then up to stay in place)
+        scroll_amount=$((1 + RANDOM % 3))
+        for _ in $(seq 1 $scroll_amount); do xdotool click 5; done
+        sleep 0.3
+        for _ in $(seq 1 $scroll_amount); do xdotool click 4; done
+        log "mmover: scroll ($scroll_amount lines)"
+        ;;
+      2)
+        # Window focus cycling (alt+tab twice to return)
+        xdotool key alt+Tab
+        sleep 0.5
+        xdotool key alt+Tab
+        log "mmover: window cycle"
+        ;;
     esac
-
-    NEW_X=$((X + dx))
-    NEW_Y=$((Y + dy))
-
-    # Keep within screen bounds (assume 1920x1080 min)
-    (( NEW_X < 10 )) && NEW_X=10
-    (( NEW_Y < 10 )) && NEW_Y=10
-    (( NEW_X > 3000 )) && NEW_X=3000
-    (( NEW_Y > 2000 )) && NEW_Y=2000
-
-    xdotool mousemove $NEW_X $NEW_Y
-    log "mmover: ($X,$Y) -> ($NEW_X,$NEW_Y)"
 
     TS=$(date +%s)000000000
     curl -sf -X POST "http://signoz-otel-collector.signoz.svc.cluster.local:4318/v1/metrics" \
