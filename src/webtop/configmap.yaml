@@ -121,7 +121,6 @@ data:
       log "chromium: already running"
     else
       su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized &" abc
-      log "chromium: opened"
     fi
 
   chromium-close.sh: |
@@ -129,7 +128,6 @@ data:
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     if pgrep -x chromium >/dev/null; then
       pkill -x chromium
-      log "chromium: closed"
     else
       log "chromium: already closed"
     fi
@@ -223,12 +221,24 @@ data:
 
     if [[ "$in_work_window" == "true" ]]; then
       if [[ "$prev" != "open" ]]; then
+        # Determine reason for opening
+        if (( t >= p2 )); then
+          log "chromium: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
+        else
+          log "chromium: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
+        fi
         /scripts/chromium-open.sh || true
         echo "open" > "$STATE_FILE"
       fi
       /scripts/mmover.sh
     else
       if [[ "$prev" != "closed" ]]; then
+        # Determine reason for closing
+        if (( t >= p1 && t < p2 )); then
+          log "chromium: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
+        else
+          log "chromium: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
+        fi
         /scripts/chromium-close.sh || true
         echo "closed" > "$STATE_FILE"
       fi
