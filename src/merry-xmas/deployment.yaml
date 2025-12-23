@@ -17,21 +17,21 @@ spec:
     spec:
       containers:
       - name: web
-        image: dawker/merry-xmas:v1.0.2
+        image: dawker/merry-xmas:v1.0.3
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8080
           name: http
         livenessProbe:
           httpGet:
             path: /
-            port: 80
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /
-            port: 80
+            port: 8080
           initialDelaySeconds: 3
           periodSeconds: 10
         resources:
@@ -71,7 +71,7 @@ spec:
   type: ClusterIP
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 8080
     protocol: TCP
     name: http
   selector:
