@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: merry-xmas
+  namespace: merry-xmas
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+  - host: merryxmas.shrub.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: merry-xmas
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - merryxmas.shrub.dev
+    secretName: merry-xmas-tls
