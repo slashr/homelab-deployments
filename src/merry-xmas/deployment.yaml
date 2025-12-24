@@ -48,6 +48,8 @@ spec:
           mountPath: /var/run
         - name: tmp
           mountPath: /tmp
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d
         securityContext:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
@@ -58,6 +60,8 @@ spec:
       - name: run
         emptyDir: {}
       - name: tmp
+        emptyDir: {}
+      - name: nginx-conf
         emptyDir: {}
 ---
 apiVersion: v1
