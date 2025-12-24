@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: dawker/merry-xmas:v1.0.12
+        image: dawker/merry-xmas:v1.0.13
         imagePullPolicy: Always
         ports:
         - containerPort: 80
