@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: dawker/merry-xmas:v1.0.3
+        image: dawker/merry-xmas:v1.0.4
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -36,33 +36,11 @@ spec:
           periodSeconds: 10
         resources:
           requests:
-            memory: "16Mi"
+            memory: "32Mi"
             cpu: "10m"
           limits:
-            memory: "32Mi"
-            cpu: "50m"
-        volumeMounts:
-        - name: cache
-          mountPath: /var/cache/nginx
-        - name: run
-          mountPath: /var/run
-        - name: tmp
-          mountPath: /tmp
-        - name: nginx-conf
-          mountPath: /etc/nginx/conf.d
-        securityContext:
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 101
-      volumes:
-      - name: cache
-        emptyDir: {}
-      - name: run
-        emptyDir: {}
-      - name: tmp
-        emptyDir: {}
-      - name: nginx-conf
-        emptyDir: {}
+            memory: "64Mi"
+            cpu: "100m"
 ---
 apiVersion: v1
 kind: Service
