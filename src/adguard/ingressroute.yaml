@@ -1,0 +1,30 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: adguard-ui-tls
+  namespace: adguard
+spec:
+  secretName: adguard-ui-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - adguard.shrub.dev
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: adguard-ui
+  namespace: adguard
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`adguard.shrub.dev`)
+      kind: Rule
+      services:
+        - name: adguard-ui-external
+          kind: TraefikService
+  tls:
+    secretName: adguard-ui-tls
