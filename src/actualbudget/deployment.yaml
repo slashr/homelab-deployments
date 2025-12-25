@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actualbudget
+  namespace: actualbudget
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: actualbudget }
+  template:
+    metadata:
+      labels: { app: actualbudget }
+    spec:
+      containers:
+        - name: actualbudget
+          image: actualbudget/actual-server:latest
+          ports:
+            - name: http
+              containerPort: 5006
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: actualbudget-data

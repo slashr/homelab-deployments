@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: actualbudget
+  namespace: actualbudget
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: ynab.shrub.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: actualbudget
+                port:
+                  number: 5006
+  tls:
+    - hosts: [ynab.shrub.dev]
+      secretName: actualbudget-tls
