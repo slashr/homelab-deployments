@@ -32,6 +32,21 @@ spec:
                     values:
                       - michael-pi
                       - jim-pi
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - jim-pi
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - michael-pi
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:8081e48e-ls272
