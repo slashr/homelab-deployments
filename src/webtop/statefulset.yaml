@@ -30,8 +30,8 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - michael
-                      - jim
+                      - michael-pi
+                      - jim-pi
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:8081e48e-ls272
