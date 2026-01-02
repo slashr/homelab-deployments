@@ -1,0 +1,75 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: velero
+  namespace: argo-cd
+spec:
+  destination:
+    namespace: velero
+    server: 'https://kubernetes.default.svc'
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+    - CreateNamespace=true
+  project: default
+  source:
+    targetRevision: '>=7.0.0'
+    repoURL: 'https://vmware-tanzu.github.io/helm-charts'
+    chart: velero
+    helm:
+      values: |
+        # AWS plugin for S3-compatible storage (OCI Object Storage)
+        initContainers:
+          - name: velero-plugin-for-aws
+            image: velero/velero-plugin-for-aws:v1.11.1
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /target
+                name: plugins
+
+        configuration:
+          # Use Kopia for file-level PVC backups
+          uploaderType: kopia
+          defaultVolumesToFsBackup: true
+
+          backupStorageLocation:
+            - name: oci-s3
+              provider: aws
+              bucket: homelab-velero-backups
+              default: true
+              config:
+                region: eu-frankfurt-1
+                s3ForcePathStyle: "true"
+                s3Url: "https://fric1vx2xara.compat.objectstorage.eu-frankfurt-1.oraclecloud.com"
+
+        # Use existing secret created by Terraform in homelab repo
+        credentials:
+          useSecret: true
+          existingSecret: velero-s3-credentials
+
+        # Daily backup schedule for stateful applications
+        schedules:
+          daily-backup:
+            disabled: false
+            schedule: "0 3 * * *"  # 3am UTC daily
+            template:
+              ttl: "720h"  # 30 days retention
+              includedNamespaces:
+                - actualbudget
+                - adguard
+                - webtop
+                - dream-home-bot
+              # Don't backup K8s resources - they're in GitOps
+              includeClusterResources: false
+              defaultVolumesToFsBackup: true
+
+        # Resource limits for Raspberry Pi cluster
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
