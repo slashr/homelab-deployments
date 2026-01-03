@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: webtop
   namespace: webtop
+  labels:
+    tailscale.com/proxy-class: kernel-mode
 spec:
   ingressClassName: tailscale
   defaultBackend:
