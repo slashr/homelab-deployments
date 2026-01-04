@@ -29,10 +29,18 @@ spec:
               - mountPath: /target
                 name: plugins
 
+        # Disable volume snapshots (using file-level backups with Kopia instead)
+        snapshotsEnabled: false
+
         configuration:
           # Use Kopia for file-level PVC backups
           uploaderType: kopia
           defaultVolumesToFsBackup: true
+
+          # Provide a dummy VSL to satisfy chart requirements (not actually used)
+          volumeSnapshotLocation:
+            - name: default
+              provider: aws
 
           backupStorageLocation:
             - name: oci-s3
