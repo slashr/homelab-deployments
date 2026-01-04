@@ -15,6 +15,13 @@ spec:
     - CreateNamespace=true
     - SkipDryRunOnMissingResource=true
     - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      name: signoz-zookeeper
+      jsonPointers:
+        - /spec/template/spec/affinity
+        - /spec/template/spec/nodeSelector
   project: default
   source:
     targetRevision: '>=0.84.0'
