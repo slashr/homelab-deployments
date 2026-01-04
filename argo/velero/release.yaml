@@ -74,8 +74,6 @@ spec:
             cpu: 500m
             memory: 512Mi
 
-        # Override kubectl image (bitnamilegacy/kubectl doesn't have 1.35)
-        kubectl:
-          image:
-            repository: bitnami/kubectl
-            tag: latest
+        # Disable upgradeCRDs job - broken with k8s 1.35 (image compatibility issues)
+        # CRDs are applied via Helm anyway
+        upgradeCRDs: false
