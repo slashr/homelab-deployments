@@ -73,3 +73,9 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+
+        # Override kubectl image (bitnamilegacy/kubectl doesn't have 1.35)
+        kubectl:
+          image:
+            repository: registry.k8s.io/kubectl
+            tag: "v1.35.0"
