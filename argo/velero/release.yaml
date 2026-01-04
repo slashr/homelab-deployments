@@ -78,3 +78,14 @@ spec:
         # Disable upgradeCRDs job - broken with k8s 1.35 (image compatibility issues)
         # CRDs are applied via Helm anyway
         upgradeCRDs: false
+
+        # Enable node-agent daemonset for PVC file-level backups
+        deployNodeAgent: true
+        nodeAgent:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
