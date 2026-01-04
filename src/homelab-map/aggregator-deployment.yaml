@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: aggregator
-        image: dawker/homelab-map-aggregator:v0.0.20
+        image: dawker/homelab-map-aggregator:v0.0.46
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
