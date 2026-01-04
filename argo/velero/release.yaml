@@ -73,3 +73,9 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+
+        # Override kubectl image (bitnamilegacy/kubectl doesn't have 1.35)
+        kubectl:
+          image:
+            repository: alpine/k8s
+            tag: "1.35.0"
