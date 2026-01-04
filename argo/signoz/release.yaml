@@ -37,7 +37,29 @@ spec:
                   - signoz.shrub.dev
                 secretName: signoz-tls
 
+          # Pin SigNoz query service to stanley-arm1
+          queryService:
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: kubernetes.io/hostname
+                          operator: In
+                          values:
+                            - stanley-arm1
+
           otelCollector:
+            # Pin central collector to stanley-arm1
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: kubernetes.io/hostname
+                          operator: In
+                          values:
+                            - stanley-arm1
             config:
               receivers:
                 hostmetrics:
@@ -53,6 +75,7 @@ spec:
                     receivers: [otlp, hostmetrics]
                     processors: [batch]
                     exporters: [clickhousemetricswrite, metadataexporter, signozclickhousemetrics]
+
         clickhouse:
           affinity:
             nodeAffinity:
@@ -62,7 +85,19 @@ spec:
                       - key: kubernetes.io/hostname
                         operator: In
                         values:
-                          - jim-pi
-                          - michael-pi
+                          - stanley-arm1
+          persistence:
+            size: 30Gi
 
-
+        zookeeper:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - stanley-arm1
+          persistence:
+            size: 2Gi
