@@ -37,6 +37,10 @@ spec:
           uploaderType: kopia
           defaultVolumesToFsBackup: true
 
+          # Clean up completed kopia maintenance jobs after 1 hour
+          repositoryMaintenanceJob:
+            ttlSecondsAfterFinished: 3600
+
           # Provide a dummy VSL to satisfy chart requirements (not actually used)
           volumeSnapshotLocation:
             - name: default
