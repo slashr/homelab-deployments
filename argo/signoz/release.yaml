@@ -88,16 +88,16 @@ spec:
                           - stanley-arm1
           persistence:
             size: 30Gi
-
-        zookeeper:
-          affinity:
-            nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                  - matchExpressions:
-                      - key: kubernetes.io/hostname
-                        operator: In
-                        values:
-                          - stanley-arm1
-          persistence:
-            size: 2Gi
+          # Zookeeper is a sub-chart of clickhouse
+          zookeeper:
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: kubernetes.io/hostname
+                          operator: In
+                          values:
+                            - stanley-arm1
+            persistence:
+              size: 2Gi
