@@ -22,31 +22,8 @@ spec:
           - webtop.svc.cluster.local
           - svc.cluster.local
           - cluster.local
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - michael-pi
-                      - jim-pi
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - jim-pi
-            - weight: 50
-              preference:
-                matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - michael-pi
+      nodeSelector:
+        kubernetes.io/hostname: stanley-arm1
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:8081e48e-ls272
@@ -77,7 +54,7 @@ spec:
               memory: "1Gi"
               cpu: "250m"
             limits:
-              memory: "3Gi"
+              memory: "6Gi"
           readinessProbe:
             httpGet:
               path: /
