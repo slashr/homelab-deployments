@@ -170,6 +170,7 @@ data:
 
     year=$(date +%Y)
     mmdd=$(date +%m%d)
+    mmdd_num=$((10#$mmdd))
 
     holidays_var="HOLIDAYS_$year"
     holidays="${!holidays_var:-}"
@@ -183,7 +184,9 @@ data:
     for v in $vacations; do
       if [[ "$v" == *-* ]]; then
         start="${v%-*}"; end="${v#*-}"
-        if [[ "$mmdd" -ge "$start" && "$mmdd" -le "$end" ]]; then
+        start_num=$((10#$start))
+        end_num=$((10#$end))
+        if (( mmdd_num >= start_num && mmdd_num <= end_num )); then
           log "vacation: skipping"
           exit 0
         fi
