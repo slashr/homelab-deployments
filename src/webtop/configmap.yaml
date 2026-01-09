@@ -116,21 +116,30 @@ data:
   chromium-open.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
+    CHROMIUM_ALREADY_FLAG="/tmp/chromium-open.already"
     export DISPLAY=:1
+
     if pgrep -x chromium >/dev/null; then
-      log "chromium: already running"
-    else
-      su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --disable-gpu &" abc
+      if [[ ! -f "$CHROMIUM_ALREADY_FLAG" ]]; then
+        log "chromium: already running"
+        touch "$CHROMIUM_ALREADY_FLAG"
+      fi
+      exit 0
     fi
+
+    rm -f "$CHROMIUM_ALREADY_FLAG"
+    su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --disable-gpu &" abc
 
   chromium-close.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
+    CHROMIUM_ALREADY_FLAG="/tmp/chromium-open.already"
     if pgrep -x chromium >/dev/null; then
       pkill -x chromium
     else
       log "chromium: already closed"
     fi
+    rm -f "$CHROMIUM_ALREADY_FLAG"
 
   workday-keeper.sh: |
     #!/bin/bash
