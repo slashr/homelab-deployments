@@ -62,6 +62,10 @@ spec:
               value: "true"
             - name: MAX_RESOLUTION
               value: "1920x1080"
+            - name: SELKIES_FRAMERATE
+              value: "15|locked"
+            - name: SELKIES_H264_CRF
+              value: "30|locked"
           resources:
             requests:
               memory: "2Gi"
