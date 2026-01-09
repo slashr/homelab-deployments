@@ -64,8 +64,8 @@ spec:
               value: "1920x1080"
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "250m"
+              memory: "2Gi"
+              cpu: "500m"
             limits:
               memory: "6Gi"
           readinessProbe:
