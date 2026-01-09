@@ -113,15 +113,15 @@ data:
       -d "{\"resourceMetrics\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"mmover\"}}]},\"scopeMetrics\":[{\"metrics\":[{\"name\":\"mmover.heartbeat\",\"gauge\":{\"dataPoints\":[{\"asInt\":1,\"timeUnixNano\":\"$TS\"}]}}]}]}]}" \
       >/dev/null 2>&1 || true
 
-  chromium-open.sh: |
-    #!/bin/bash
-    log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
-    export DISPLAY=:1
-    if pgrep -x chromium >/dev/null; then
-      log "chromium: already running"
-    else
-      su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized &" abc
-    fi
+    chromium-open.sh: |
+      #!/bin/bash
+      log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
+      export DISPLAY=:1
+      if pgrep -x chromium >/dev/null; then
+        log "chromium: already running"
+      else
+        su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --disable-gpu &" abc
+      fi
 
   chromium-close.sh: |
     #!/bin/bash
