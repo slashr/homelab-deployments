@@ -54,6 +54,14 @@ spec:
               value: "1000"
             - name: TZ
               value: "Europe/Amsterdam"
+            - name: SELKIES_MANUAL_WIDTH
+              value: "1920"
+            - name: SELKIES_MANUAL_HEIGHT
+              value: "1080"
+            - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
+              value: "true"
+            - name: MAX_RESOLUTION
+              value: "1920x1080"
           resources:
             requests:
               memory: "1Gi"
