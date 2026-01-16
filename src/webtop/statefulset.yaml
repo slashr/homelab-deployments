@@ -68,10 +68,10 @@ spec:
               value: "34|locked"
           resources:
             requests:
-              memory: "2Gi"
+              memory: "1500Mi"
               cpu: "500m"
             limits:
-              memory: "6Gi"
+              memory: "3Gi"
           readinessProbe:
             httpGet:
               path: /
@@ -97,11 +97,11 @@ spec:
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: 2Gi
+            sizeLimit: 1Gi
         - name: tmp
           emptyDir:
             medium: Memory
-            sizeLimit: 512Mi
+            sizeLimit: 256Mi
         - name: custom-scripts
           configMap:
             name: webtop-scripts
