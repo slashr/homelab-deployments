@@ -68,7 +68,7 @@ spec:
               value: "x264enc"
           resources:
             requests:
-              memory: "2Gi"
+              memory: "1500Mi"
               cpu: "2"
             limits:
               memory: "4Gi"
