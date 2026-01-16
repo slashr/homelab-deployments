@@ -61,9 +61,9 @@ spec:
             - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
               value: "true"
             - name: SELKIES_FRAMERATE
-              value: "24"
+              value: "15"
             - name: SELKIES_H264_CRF
-              value: "30"
+              value: "35"
             - name: SELKIES_ENCODER
               value: "x264enc"
           resources:
