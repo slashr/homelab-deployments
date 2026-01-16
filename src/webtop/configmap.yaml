@@ -17,9 +17,19 @@ data:
   setup.sh: |
     #!/bin/bash
     set -e
+    # Setup cron for workday-keeper
     crontab -l 2>/dev/null | grep -v workday > /tmp/crontab.tmp || true
     echo "*/3 * * * 1-5 /scripts/workday-keeper.sh" >> /tmp/crontab.tmp
     crontab /tmp/crontab.tmp
+
+    # Patch selkies startup to use performance-optimized settings
+    SELKIES_RUN="/etc/s6-overlay/s6-rc.d/svc-selkies/run"
+    if [ -f "$SELKIES_RUN" ] && ! grep -q "framerate" "$SELKIES_RUN"; then
+      sed -i 's|selkies \\|selkies \\\n    --framerate="${SELKIES_FRAMERATE:-24}" \\\n    --h264-crf="${SELKIES_H264_CRF:-30}" \\|' "$SELKIES_RUN"
+      # Restart selkies to apply new settings
+      s6-svc -r /run/service/svc-selkies 2>/dev/null || true
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] selkies: patched with framerate=${SELKIES_FRAMERATE:-24} crf=${SELKIES_H264_CRF:-30}" > /proc/1/fd/1
+    fi
 
   mmover.sh: |
     #!/bin/bash
