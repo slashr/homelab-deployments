@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: aggregator
-        image: dawker/homelab-map-aggregator:v0.1.13
+        image: dawker/homelab-map-aggregator:v0.2.3
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -28,6 +28,11 @@ spec:
             secretKeyRef:
               name: homelab-map-openai
               key: OPENAI_API_KEY
+        - name: INTERACTIVE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: homelab-map-openai
+              key: INTERACTIVE_PASSWORD
         livenessProbe:
           httpGet:
             path: /
