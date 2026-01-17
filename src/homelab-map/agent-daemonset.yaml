@@ -19,7 +19,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: agent
-        image: dawker/homelab-map-agent:v0.1.13
+        image: dawker/homelab-map-agent:v0.1.17
         imagePullPolicy: Always
         env:
         - name: AGGREGATOR_URL
