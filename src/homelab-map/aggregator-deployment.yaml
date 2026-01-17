@@ -22,6 +22,12 @@ spec:
         ports:
         - containerPort: 8000
           name: http
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homelab-map-openai
+              key: OPENAI_API_KEY
         livenessProbe:
           httpGet:
             path: /
