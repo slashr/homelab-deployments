@@ -31,7 +31,7 @@ spec:
         - name: INTERACTIVE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: homelab-map-openai
+              name: homelab-map-interactive-password
               key: INTERACTIVE_PASSWORD
         livenessProbe:
           httpGet:
