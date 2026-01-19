@@ -66,6 +66,8 @@ spec:
           volumeMounts:
             - name: xdotool
               mountPath: /opt/xdotool
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: webtop
           image: kasmweb/ubuntu-noble-desktop:aarch64-1.18.0-rolling-daily
