@@ -29,20 +29,6 @@ spec:
           - cluster.local
       nodeSelector:
         kubernetes.io/hostname: jim-pi
-      # Patch vnc_startup.sh to remove -sslOnly flag for HTTP support
-      initContainers:
-        - name: patch-vnc-startup
-          image: kasmweb/debian-trixie-desktop:1.18.0
-          command:
-            - /bin/sh
-            - -c
-            - |
-              cp -a /dockerstartup/* /patched-startup/
-              sed -i 's/-sslOnly //g' /patched-startup/vnc_startup.sh
-              echo "Patched vnc_startup.sh to remove -sslOnly"
-          volumeMounts:
-            - name: patched-startup
-              mountPath: /patched-startup
       containers:
         - name: webtop
           image: kasmweb/debian-trixie-desktop:1.18.0
@@ -80,14 +66,15 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
-            - name: patched-startup
-              mountPath: /dockerstartup
             - name: custom-startup
               mountPath: /dockerstartup/custom_startup.sh
               subPath: custom_startup.sh
             - name: kasmvnc-config
               mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
               subPath: kasmvnc_defaults.yaml
+            - name: tailscale-certs
+              mountPath: /certs
+              readOnly: true
       volumes:
         - name: dshm
           emptyDir:
@@ -97,8 +84,6 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 256Mi
-        - name: patched-startup
-          emptyDir: {}
         - name: custom-startup
           configMap:
             name: webtop-scripts
@@ -112,6 +97,10 @@ spec:
             items:
               - key: kasmvnc_defaults.yaml
                 path: kasmvnc_defaults.yaml
+        - name: tailscale-certs
+          hostPath:
+            path: /etc/tailscale-certs
+            type: Directory
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
