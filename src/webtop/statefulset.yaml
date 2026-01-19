@@ -29,6 +29,21 @@ spec:
           - cluster.local
       nodeSelector:
         kubernetes.io/hostname: jim-pi
+      initContainers:
+        - name: copy-cert
+          image: busybox
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp /certs/combined.pem /vnc-cert/self.pem
+              chmod 644 /vnc-cert/self.pem
+          volumeMounts:
+            - name: tailscale-cert
+              mountPath: /certs
+              readOnly: true
+            - name: vnc-cert
+              mountPath: /vnc-cert
       containers:
         - name: webtop
           image: kasmweb/debian-trixie-desktop:1.18.0
@@ -72,10 +87,9 @@ spec:
             - name: kasmvnc-config
               mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
               subPath: kasmvnc_defaults.yaml
-            - name: tailscale-cert
+            - name: vnc-cert
               mountPath: /home/kasm-user/.vnc/self.pem
-              subPath: combined.pem
-              readOnly: true
+              subPath: self.pem
       volumes:
         - name: dshm
           emptyDir:
@@ -102,6 +116,8 @@ spec:
           hostPath:
             path: /etc/tailscale-certs
             type: Directory
+        - name: vnc-cert
+          emptyDir: {}
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
