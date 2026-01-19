@@ -144,14 +144,14 @@ data:
 
     if pgrep -x firefox-esr >/dev/null; then
       if [[ ! -f "$FIREFOX_ALREADY_FLAG" ]]; then
-        log "firefox: already running"
+        log "ff: already running"
         touch "$FIREFOX_ALREADY_FLAG"
       fi
       exit 0
     fi
 
     rm -f "$FIREFOX_ALREADY_FLAG"
-    log "firefox: starting"
+    log "ff: starting"
     DISPLAY=:1 firefox-esr &
 
   ff-c.sh: |
@@ -160,9 +160,9 @@ data:
     FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
     if pgrep -x firefox-esr >/dev/null; then
       pkill -x firefox-esr
-      log "firefox: closed"
+      log "ff: closed"
     else
-      log "firefox: already closed"
+      log "ff: already closed"
     fi
     rm -f "$FIREFOX_ALREADY_FLAG"
 
@@ -376,9 +376,9 @@ data:
       if [[ "$prev" != "open" ]]; then
         # Determine reason for opening
         if (( t >= p2 )); then
-          log "firefox: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
+          log "ff: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
         else
-          log "firefox: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
+          log "ff: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
         fi
         /scripts/ff-o.sh || true
         echo "open" > "$STATE_FILE"
@@ -388,9 +388,9 @@ data:
       if [[ "$prev" != "closed" ]]; then
         # Determine reason for closing
         if (( t >= p1 && t < p2 )); then
-          log "firefox: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
+          log "ff: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
         else
-          log "firefox: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
+          log "ff: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
         fi
         /scripts/ff-c.sh || true
         echo "closed" > "$STATE_FILE"
