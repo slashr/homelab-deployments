@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: dawker/homelab-map-frontend:v0.2.5
+        image: dawker/homelab-map-frontend:v1.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 80
