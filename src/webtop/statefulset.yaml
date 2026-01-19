@@ -49,6 +49,8 @@ spec:
           env:
             - name: VNC_PW
               value: "attribute"
+            - name: HW3D
+              value: "1"
             - name: DRINODE
               value: /dev/dri/renderD128
             - name: DRI_NODE
