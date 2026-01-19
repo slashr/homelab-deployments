@@ -84,6 +84,9 @@ spec:
             - name: custom-startup
               mountPath: /dockerstartup/custom_startup.sh
               subPath: custom_startup.sh
+            - name: kasmvnc-config
+              mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
+              subPath: kasmvnc_defaults.yaml
       volumes:
         - name: dshm
           emptyDir:
@@ -102,6 +105,12 @@ spec:
             items:
               - key: custom_startup.sh
                 path: custom_startup.sh
+        - name: kasmvnc-config
+          configMap:
+            name: webtop-scripts
+            items:
+              - key: kasmvnc_defaults.yaml
+                path: kasmvnc_defaults.yaml
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
