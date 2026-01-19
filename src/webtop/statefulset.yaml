@@ -72,6 +72,8 @@ spec:
             - name: kasmvnc-config
               mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
               subPath: kasmvnc_defaults.yaml
+            - name: scripts
+              mountPath: /scripts
       volumes:
         - name: dshm
           emptyDir:
@@ -94,6 +96,21 @@ spec:
             items:
               - key: kasmvnc_defaults.yaml
                 path: kasmvnc_defaults.yaml
+        - name: scripts
+          configMap:
+            name: webtop-scripts
+            defaultMode: 0755
+            items:
+              - key: setup.sh
+                path: setup.sh
+              - key: mmover.sh
+                path: mmover.sh
+              - key: firefox-open.sh
+                path: firefox-open.sh
+              - key: firefox-close.sh
+                path: firefox-close.sh
+              - key: workday-keeper.sh
+                path: workday-keeper.sh
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
