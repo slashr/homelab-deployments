@@ -62,7 +62,7 @@ spec:
               mountPath: /opt/xdotool
       containers:
         - name: webtop
-          image: kasmweb/brave:1.18.0-rolling-daily
+          image: kasmweb/ubuntu-noble-desktop:aarch64-1.18.0-rolling-daily
           securityContext:
             seccompProfile:
               type: Unconfined
@@ -73,6 +73,8 @@ spec:
           env:
             - name: VNC_PW
               value: "attribute"
+            - name: HW3D
+              value: "1"
             - name: DRINODE
               value: /dev/dri/renderD128
             - name: DRI_NODE
