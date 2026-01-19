@@ -48,6 +48,8 @@ spec:
               value: "0"
             - name: KASM_SVC_WEBCAM
               value: "0"
+            - name: KASM_SVC_PRINTER
+              value: "0"
           resources:
             requests:
               memory: "1500Mi"
