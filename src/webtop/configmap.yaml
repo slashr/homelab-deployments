@@ -136,7 +136,7 @@ data:
       -d "{\"resourceMetrics\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"mmover\"}}]},\"scopeMetrics\":[{\"metrics\":[{\"name\":\"mmover.heartbeat\",\"gauge\":{\"dataPoints\":[{\"asInt\":1,\"timeUnixNano\":\"$TS\"}]}}]}]}]}" \
       >/dev/null 2>&1 || true
 
-  firefox-open.sh: |
+  ff-o.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
@@ -154,7 +154,7 @@ data:
     log "firefox: starting"
     DISPLAY=:1 firefox-esr &
 
-  firefox-close.sh: |
+  ff-c.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
@@ -380,7 +380,7 @@ data:
         else
           log "firefox: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
         fi
-        /scripts/firefox-open.sh || true
+        /scripts/ff-o.sh || true
         echo "open" > "$STATE_FILE"
       fi
       /scripts/mmover.sh
@@ -392,7 +392,12 @@ data:
         else
           log "firefox: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
         fi
-        /scripts/firefox-close.sh || true
+        /scripts/ff-c.sh || true
         echo "closed" > "$STATE_FILE"
+      fi
+      # Log once per hour during off-hours (when minute is 0-2, since cron runs every 3 min)
+      minute=$(date +%M)
+      if (( 10#$minute < 3 )); then
+        log "off-hours: no activity"
       fi
     fi

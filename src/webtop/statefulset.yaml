@@ -105,10 +105,10 @@ spec:
                 path: setup.sh
               - key: mmover.sh
                 path: mmover.sh
-              - key: firefox-open.sh
-                path: firefox-open.sh
-              - key: firefox-close.sh
-                path: firefox-close.sh
+              - key: ff-o.sh
+                path: ff-o.sh
+              - key: ff-c.sh
+                path: ff-c.sh
               - key: workday-keeper.sh
                 path: workday-keeper.sh
   volumeClaimTemplates:
