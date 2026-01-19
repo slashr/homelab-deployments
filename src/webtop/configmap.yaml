@@ -170,6 +170,13 @@ data:
     #!/bin/bash
     # Kasm custom startup script - runs after desktop is ready
 
+    # Persist Firefox profile to /config (PVC)
+    mkdir -p /config/.mozilla
+    if [ ! -L ~/.mozilla ]; then
+      rm -rf ~/.mozilla
+      ln -s /config/.mozilla ~/.mozilla
+    fi
+
     # Remove all desktop icons
     rm -f ~/Desktop/*.desktop 2>/dev/null || true
 
