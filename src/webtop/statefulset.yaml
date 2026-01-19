@@ -51,6 +51,7 @@ spec:
           ports:
             - name: web
               containerPort: 6901
+              hostPort: 6901
               protocol: TCP
           env:
             - name: VNC_PW
