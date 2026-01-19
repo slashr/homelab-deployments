@@ -35,7 +35,7 @@ spec:
           - 105  # render
       containers:
         - name: webtop
-          image: lscr.io/linuxserver/webtop:alpine-i3
+          image: lscr.io/linuxserver/webtop:alpine-mate
           securityContext:
             seccompProfile:
               type: Unconfined
