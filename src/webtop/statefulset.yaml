@@ -45,7 +45,7 @@ spec:
             - |
               set -euo pipefail
               apt-get update -y
-              apt-get install -y xdotool vainfo
+              apt-get install -y xdotool vainfo mesa-va-drivers libva-drm2 libva-x11-2 libva-wayland2
               mkdir -p /opt/xdotool/bin /opt/xdotool/lib
               cp -v /usr/bin/xdotool /opt/xdotool/bin/
               cp -v /usr/bin/vainfo /opt/xdotool/bin/
@@ -55,6 +55,8 @@ spec:
               ldd /usr/bin/vainfo | awk '{print $3}' | grep -E '^/' | while read -r lib; do
                 cp -v --parents "$lib" /opt/xdotool/lib/
               done
+              mkdir -p /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/dri
+              cp -v /usr/lib/aarch64-linux-gnu/dri/*_drv_video.so /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/dri/ || true
           volumeMounts:
             - name: xdotool
               mountPath: /opt/xdotool
@@ -75,6 +77,10 @@ spec:
               value: /dev/dri/renderD128
             - name: DRI_NODE
               value: /dev/dri/renderD128
+            - name: LIBVA_DRIVERS_PATH
+              value: /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/dri
+            - name: LIBVA_DRIVER_NAME
+              value: v3d
             - name: PATH
               value: "/opt/xdotool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: LD_LIBRARY_PATH
