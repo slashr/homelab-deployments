@@ -37,17 +37,47 @@ spec:
           - 105  # render
       containers:
         - name: webtop
-          image: kasmweb/slack:1.16.0
+          image: lscr.io/linuxserver/webtop:debian-xfce
           securityContext:
             seccompProfile:
               type: Unconfined
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    sleep 30 && /scripts/setup.sh &
           ports:
             - name: web
-              containerPort: 6901
+              containerPort: 3000
               protocol: TCP
           env:
-            - name: VNC_PW
-              value: "kasm"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: SELKIES_MANUAL_WIDTH
+              value: "1024"
+            - name: SELKIES_MANUAL_HEIGHT
+              value: "768"
+            - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
+              value: "true"
+            - name: SELKIES_FRAMERATE
+              value: "10"
+            - name: SELKIES_H264_CRF
+              value: "40"
+            - name: SELKIES_ENCODER
+              value: "x264enc"
+            - name: DISABLE_DRI3
+              value: "false"
+            - name: DRINODE
+              value: "/dev/dri/renderD128"
+            - name: DRI_NODE
+              value: "/dev/dri/renderD128"
           resources:
             requests:
               memory: "1500Mi"
@@ -58,15 +88,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: 6901
-              scheme: HTTPS
+              port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /
-              port: 6901
-              scheme: HTTPS
+              port: 3000
             initialDelaySeconds: 60
             periodSeconds: 30
           volumeMounts:
@@ -76,6 +104,8 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
+            - name: custom-scripts
+              mountPath: /scripts
             - name: dri
               mountPath: /dev/dri
             - name: tty0
@@ -89,6 +119,10 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 256Mi
+        - name: custom-scripts
+          configMap:
+            name: webtop-scripts
+            defaultMode: 0755
         - name: dri
           hostPath:
             path: /dev/dri
