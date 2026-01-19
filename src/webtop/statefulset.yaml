@@ -29,31 +29,9 @@ spec:
           - cluster.local
       nodeSelector:
         kubernetes.io/hostname: jim-pi
-      securityContext:
-        supplementalGroups:
-          - 5    # tty
-          - 44   # video
-          - 102  # input
-          - 105  # render
-          - 109  # render (Debian/Ubuntu default)
-      initContainers:
-        - name: init-tmp-x11
-          image: busybox:1.36
-          command:
-            - /bin/sh
-            - -c
-            - |
-              set -e
-              mkdir -p /tmp/.X11-unix
-              chmod 1777 /tmp/.X11-unix
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
       containers:
         - name: webtop
           image: kasmweb/debian-trixie-desktop:1.18.0
-          securityContext:
-            privileged: true  # Required for DRM/GBM GPU access on Raspberry Pi
           ports:
             - name: web
               containerPort: 6901
@@ -61,12 +39,6 @@ spec:
           env:
             - name: VNC_PW
               value: "attribute"
-            - name: HW3D
-              value: "1"
-            - name: DRINODE
-              value: /dev/dri/renderD128
-            - name: DRI_NODE
-              value: /dev/dri/renderD128
           resources:
             requests:
               memory: "1500Mi"
@@ -91,10 +63,6 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
-            - name: dri
-              mountPath: /dev/dri
-            - name: tty0
-              mountPath: /dev/tty0
             - name: custom-startup
               mountPath: /dockerstartup/custom_startup.sh
               subPath: custom_startup.sh
@@ -107,14 +75,6 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 256Mi
-        - name: dri
-          hostPath:
-            path: /dev/dri
-            type: Directory
-        - name: tty0
-          hostPath:
-            path: /dev/tty0
-            type: CharDevice
         - name: custom-startup
           configMap:
             name: webtop-scripts
