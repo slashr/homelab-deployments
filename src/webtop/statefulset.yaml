@@ -36,6 +36,19 @@ spec:
           - 102  # input
           - 105  # render
           - 109  # render (Debian/Ubuntu default)
+      initContainers:
+        - name: init-tmp-x11
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mkdir -p /tmp/.X11-unix
+              chmod 1777 /tmp/.X11-unix
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: webtop
           image: dawker/visy:v1.0.0
