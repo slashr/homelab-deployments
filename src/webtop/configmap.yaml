@@ -395,9 +395,9 @@ data:
         /scripts/ff-c.sh || true
         echo "closed" > "$STATE_FILE"
       fi
-      # Log once per hour during off-hours (when minute is 0-2, since cron runs every 3 min)
+      # Log every 15 min during off-hours (at :00, :15, :30, :45)
       minute=$(date +%M)
-      if (( 10#$minute < 3 )); then
+      if (( 10#$minute % 15 < 3 )); then
         log "off-hours: no activity"
       fi
     fi
