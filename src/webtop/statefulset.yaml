@@ -46,6 +46,8 @@ spec:
               set -euo pipefail
               apt-get update -y
               apt-get install -y xdotool vainfo mesa-va-drivers libva-drm2 libva-x11-2 libva-wayland2
+              mkdir -p /tmp/.X11-unix
+              chmod 1777 /tmp/.X11-unix
               mkdir -p /opt/xdotool/bin /opt/xdotool/lib
               cp -v /usr/bin/xdotool /opt/xdotool/bin/
               cp -v /usr/bin/vainfo /opt/xdotool/bin/
