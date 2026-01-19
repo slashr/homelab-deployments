@@ -81,6 +81,10 @@ spec:
               value: /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/dri
             - name: LIBVA_DRIVER_NAME
               value: v3d
+            - name: LIBGL_DRIVERS_PATH
+              value: /usr/lib/aarch64-linux-gnu/dri
+            - name: MESA_LOADER_DRIVER_OVERRIDE
+              value: v3d
             - name: PATH
               value: "/opt/xdotool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: LD_LIBRARY_PATH
