@@ -17,6 +17,8 @@ spec:
         pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 chromium 2>/dev/null; sync"]'
         pre.hook.backup.velero.io/timeout: "30s"
     spec:
+      hostPID: true
+      hostIPC: true
       dnsPolicy: None
       dnsConfig:
         nameservers:
@@ -114,6 +116,11 @@ spec:
               mountPath: /dev/dri
             - name: tty0
               mountPath: /dev/tty0
+            - name: dev-input
+              mountPath: /dev/input
+            - name: run-udev
+              mountPath: /run/udev
+              readOnly: true
       volumes:
         - name: dshm
           emptyDir:
@@ -135,6 +142,14 @@ spec:
           hostPath:
             path: /dev/tty0
             type: CharDevice
+        - name: dev-input
+          hostPath:
+            path: /dev/input
+            type: Directory
+        - name: run-udev
+          hostPath:
+            path: /run/udev
+            type: DirectoryOrCreate
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
