@@ -138,7 +138,7 @@ data:
     fi
 
     rm -f "$CHROMIUM_ALREADY_FLAG"
-    su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --disable-gpu --disable-animations --disable-features=WebUIAnimations --disable-smooth-scrolling &" abc
+    su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --enable-gpu-rasterization --ignore-gpu-blocklist --enable-zero-copy --disable-animations --disable-features=WebUIAnimations --disable-smooth-scrolling &" abc
 
   chromium-close.sh: |
     #!/bin/bash
