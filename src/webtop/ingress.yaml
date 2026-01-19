@@ -9,7 +9,7 @@ spec:
     service:
       name: webtop
       port:
-        number: 3000
+        number: 6901
   tls:
     - hosts:
         - slack
