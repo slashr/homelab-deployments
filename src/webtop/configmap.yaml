@@ -164,6 +164,23 @@ data:
     fi
     rm -f "$CHROMIUM_ALREADY_FLAG"
 
+  custom_startup.sh: |
+    #!/bin/bash
+    # Kasm custom startup script - runs after desktop is ready
+
+    # Remove all desktop icons
+    rm -f ~/Desktop/*.desktop 2>/dev/null || true
+
+    # Download and set wallpaper
+    curl -sL -o ~/wallpaper.jpg "https://m.media-amazon.com/images/I/91ZItuM6veL.jpg"
+
+    # Set wallpaper for all possible monitor names
+    for monitor in "VNC-0" "Virtual-1" "default"; do
+      xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor${monitor}/workspace0/last-image -s ~/wallpaper.jpg 2>/dev/null || true
+    done
+
+    echo "[custom_startup] Desktop customized: icons removed, wallpaper set"
+
   workday-keeper.sh: |
     #!/bin/bash
     set -euo pipefail
