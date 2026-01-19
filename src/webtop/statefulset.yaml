@@ -29,6 +29,10 @@ spec:
           - cluster.local
       nodeSelector:
         kubernetes.io/hostname: jim-pi
+      securityContext:
+        supplementalGroups:
+          - 44   # video
+          - 105  # render
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:alpine-i3
@@ -94,6 +98,8 @@ spec:
               mountPath: /tmp
             - name: custom-scripts
               mountPath: /scripts
+            - name: dri
+              mountPath: /dev/dri
       volumes:
         - name: dshm
           emptyDir:
@@ -107,6 +113,10 @@ spec:
           configMap:
             name: webtop-scripts
             defaultMode: 0755
+        - name: dri
+          hostPath:
+            path: /dev/dri
+            type: Directory
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
