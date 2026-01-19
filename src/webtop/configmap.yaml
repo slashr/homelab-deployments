@@ -152,7 +152,7 @@ data:
 
     rm -f "$FIREFOX_ALREADY_FLAG"
     log "firefox: starting"
-    su -s /bin/bash -c "DISPLAY=:1 firefox-esr &" kasm-user
+    DISPLAY=:1 firefox-esr &
 
   firefox-close.sh: |
     #!/bin/bash
