@@ -31,7 +31,9 @@ spec:
         kubernetes.io/hostname: jim-pi
       securityContext:
         supplementalGroups:
+          - 5    # tty
           - 44   # video
+          - 102  # input
           - 105  # render
       containers:
         - name: webtop
@@ -110,6 +112,8 @@ spec:
               mountPath: /scripts
             - name: dri
               mountPath: /dev/dri
+            - name: tty0
+              mountPath: /dev/tty0
       volumes:
         - name: dshm
           emptyDir:
@@ -127,6 +131,10 @@ spec:
           hostPath:
             path: /dev/dri
             type: Directory
+        - name: tty0
+          hostPath:
+            path: /dev/tty0
+            type: CharDevice
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
