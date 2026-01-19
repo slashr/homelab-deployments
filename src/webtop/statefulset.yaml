@@ -76,6 +76,10 @@ spec:
               value: "/dev/dri/renderD128"
             - name: PIXELFLUX_WAYLAND
               value: "true"
+            - name: XDG_RUNTIME_DIR
+              value: "/config/.XDG"
+            - name: WAYLAND_DISPLAY
+              value: "wayland-1"
           resources:
             requests:
               memory: "1500Mi"

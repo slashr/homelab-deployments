@@ -31,6 +31,27 @@ data:
       echo "[$(date '+%Y-%m-%d %H:%M:%S')] selkies: patched with framerate=${SELKIES_FRAMERATE:-10} crf=${SELKIES_H264_CRF:-40}" > /proc/1/fd/1
     fi
 
+    # Ensure labwc is running in Wayland mode (needed for PIXELFLUX_WAYLAND)
+    if [ "${PIXELFLUX_WAYLAND}" = "true" ]; then
+      CUSTOM_SVC="/config/custom-services.d/labwc"
+      mkdir -p "$CUSTOM_SVC"
+      if [ ! -f "$CUSTOM_SVC/run" ]; then
+        cat > "$CUSTOM_SVC/run" <<'EOF'
+#!/usr/bin/with-contenv sh
+if [ "${PIXELFLUX_WAYLAND}" != "true" ]; then
+  sleep infinity
+fi
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/config/.XDG}"
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+chown abc:abc "$XDG_RUNTIME_DIR"
+export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+exec s6-setuidgid abc labwc
+EOF
+        chmod 755 "$CUSTOM_SVC/run"
+      fi
+    fi
+
   mmover.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
