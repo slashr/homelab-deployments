@@ -67,6 +67,13 @@ spec:
               value: /dev/dri/renderD128
             - name: DRI_NODE
               value: /dev/dri/renderD128
+            - name: CUSTOM_USER_SCRIPT
+              value: |
+                # Remove all desktop icons
+                rm -f ~/Desktop/*.desktop 2>/dev/null
+                # Download and set wallpaper
+                curl -sL -o ~/wallpaper.jpg "https://m.media-amazon.com/images/I/91ZItuM6veL.jpg"
+                xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVNC-0/workspace0/last-image -s ~/wallpaper.jpg
           resources:
             requests:
               memory: "1500Mi"
