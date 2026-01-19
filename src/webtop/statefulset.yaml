@@ -14,7 +14,7 @@ spec:
       annotations:
         # Velero pre-backup hook: flush filesystem and gracefully signal Chromium to save
         backup.velero.io/backup-volumes: webtop-data
-        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 chromium 2>/dev/null; sync"]'
+        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 firefox-esr 2>/dev/null; sync"]'
         pre.hook.backup.velero.io/timeout: "30s"
     spec:
       dnsPolicy: None

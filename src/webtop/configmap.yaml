@@ -136,33 +136,35 @@ data:
       -d "{\"resourceMetrics\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"mmover\"}}]},\"scopeMetrics\":[{\"metrics\":[{\"name\":\"mmover.heartbeat\",\"gauge\":{\"dataPoints\":[{\"asInt\":1,\"timeUnixNano\":\"$TS\"}]}}]}]}]}" \
       >/dev/null 2>&1 || true
 
-  chromium-open.sh: |
+  firefox-open.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
-    CHROMIUM_ALREADY_FLAG="/tmp/chromium-open.already"
+    FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
     export DISPLAY=:1
 
-    if pgrep -x chromium >/dev/null; then
-      if [[ ! -f "$CHROMIUM_ALREADY_FLAG" ]]; then
-        log "chromium: already running"
-        touch "$CHROMIUM_ALREADY_FLAG"
+    if pgrep -x firefox-esr >/dev/null; then
+      if [[ ! -f "$FIREFOX_ALREADY_FLAG" ]]; then
+        log "firefox: already running"
+        touch "$FIREFOX_ALREADY_FLAG"
       fi
       exit 0
     fi
 
-    rm -f "$CHROMIUM_ALREADY_FLAG"
-    su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --use-gl=egl --ignore-gpu-blocklist --enable-gpu-rasterization --enable-zero-copy --enable-features=AcceleratedVideoDecoder,AcceleratedVideoDecodeLinuxGL,AcceleratedVideoDecodeLinuxZeroCopyGL --disable-animations --disable-features=WebUIAnimations --disable-smooth-scrolling &" abc
+    rm -f "$FIREFOX_ALREADY_FLAG"
+    log "firefox: starting"
+    su -s /bin/bash -c "DISPLAY=:1 firefox-esr &" kasm-user
 
-  chromium-close.sh: |
+  firefox-close.sh: |
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
-    CHROMIUM_ALREADY_FLAG="/tmp/chromium-open.already"
-    if pgrep -x chromium >/dev/null; then
-      pkill -x chromium
+    FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
+    if pgrep -x firefox-esr >/dev/null; then
+      pkill -x firefox-esr
+      log "firefox: closed"
     else
-      log "chromium: already closed"
+      log "firefox: already closed"
     fi
-    rm -f "$CHROMIUM_ALREADY_FLAG"
+    rm -f "$FIREFOX_ALREADY_FLAG"
 
   custom_startup.sh: |
     #!/bin/bash
@@ -367,11 +369,11 @@ data:
       if [[ "$prev" != "open" ]]; then
         # Determine reason for opening
         if (( t >= p2 )); then
-          log "chromium: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
+          log "firefox: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
         else
-          log "chromium: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
+          log "firefox: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
         fi
-        /scripts/chromium-open.sh || true
+        /scripts/firefox-open.sh || true
         echo "open" > "$STATE_FILE"
       fi
       /scripts/mmover.sh
@@ -379,11 +381,11 @@ data:
       if [[ "$prev" != "closed" ]]; then
         # Determine reason for closing
         if (( t >= p1 && t < p2 )); then
-          log "chromium: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
+          log "firefox: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
         else
-          log "chromium: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
+          log "firefox: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
         fi
-        /scripts/chromium-close.sh || true
+        /scripts/firefox-close.sh || true
         echo "closed" > "$STATE_FILE"
       fi
     fi
