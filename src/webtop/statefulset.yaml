@@ -32,6 +32,8 @@ spec:
       containers:
         - name: webtop
           image: kasmweb/debian-trixie-desktop:1.18.0
+          securityContext:
+            privileged: true
           ports:
             - name: web
               containerPort: 6901
