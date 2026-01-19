@@ -38,7 +38,7 @@ spec:
           - 109  # render (Debian/Ubuntu default)
       initContainers:
         - name: install-xdotool
-          image: ubuntu:jammy
+          image: ubuntu:noble
           command:
             - /bin/bash
             - -c
