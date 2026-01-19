@@ -79,7 +79,7 @@ spec:
             - name: PIXELFLUX_WAYLAND
               value: "true"
             - name: XDG_RUNTIME_DIR
-              value: "/config/.XDG"
+              value: "/tmp/xdg-runtime"
             - name: WAYLAND_DISPLAY
               value: "wayland-1"
           resources:
