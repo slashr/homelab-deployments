@@ -51,7 +51,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: webtop
-          image: kasmweb/debian-trixie-desktop:1.18.0
+          image: dawker/visy:v1.0.1
           securityContext:
             privileged: true  # Required for DRM/GBM GPU access on Raspberry Pi
           ports:
