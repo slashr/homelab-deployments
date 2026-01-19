@@ -36,41 +36,9 @@ spec:
           - 102  # input
           - 105  # render
           - 109  # render (Debian/Ubuntu default)
-      initContainers:
-        - name: install-xdotool
-          image: ubuntu:noble
-          command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              apt-get update -y
-              apt-get install -y xdotool vainfo mesa-va-drivers libva-drm2 libva-x11-2 libva-wayland2
-              mkdir -p /tmp/.X11-unix
-              chmod 1777 /tmp/.X11-unix
-              mkdir -p /opt/xdotool/bin /opt/xdotool/lib
-              cp -v /usr/bin/xdotool /opt/xdotool/bin/
-              cp -v /usr/bin/vainfo /opt/xdotool/bin/
-              ldd /usr/bin/xdotool | awk '{print $3}' | grep -E '^/' | while read -r lib; do
-                cp -v --parents "$lib" /opt/xdotool/lib/
-              done
-              ldd /usr/bin/vainfo | awk '{print $3}' | grep -E '^/' | while read -r lib; do
-                cp -v --parents "$lib" /opt/xdotool/lib/
-              done
-              rm -f /opt/xdotool/lib/lib/aarch64-linux-gnu/libc.so.6
-              rm -f /opt/xdotool/lib/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
-              rm -f /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/libc.so.6
-              rm -f /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
-              mkdir -p /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/dri
-              cp -v /usr/lib/aarch64-linux-gnu/dri/*_drv_video.so /opt/xdotool/lib/usr/lib/aarch64-linux-gnu/dri/ || true
-          volumeMounts:
-            - name: xdotool
-              mountPath: /opt/xdotool
-            - name: tmp
-              mountPath: /tmp
       containers:
         - name: webtop
-          image: kasmweb/ubuntu-noble-desktop:aarch64-1.18.0-rolling-daily
+          image: dawker/visy:v1.0.0
           securityContext:
             seccompProfile:
               type: Unconfined
@@ -85,10 +53,6 @@ spec:
               value: /dev/dri/renderD128
             - name: DRI_NODE
               value: /dev/dri/renderD128
-            - name: PATH
-              value: "/opt/xdotool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-            - name: LD_LIBRARY_PATH
-              value: "/opt/xdotool/lib/lib/aarch64-linux-gnu:/opt/xdotool/lib/usr/lib/aarch64-linux-gnu:/opt/xdotool/lib"
           resources:
             requests:
               memory: "1500Mi"
@@ -117,8 +81,6 @@ spec:
               mountPath: /dev/dri
             - name: tty0
               mountPath: /dev/tty0
-            - name: xdotool
-              mountPath: /opt/xdotool
       volumes:
         - name: dshm
           emptyDir:
@@ -136,8 +98,6 @@ spec:
           hostPath:
             path: /dev/tty0
             type: CharDevice
-        - name: xdotool
-          emptyDir: {}
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
