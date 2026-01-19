@@ -37,7 +37,7 @@ spec:
           - 105  # render
       containers:
         - name: webtop
-          image: kasmweb/alpine-321-desktop:1.18.0
+          image: kasmweb/slack:1.16.0
           securityContext:
             seccompProfile:
               type: Unconfined
