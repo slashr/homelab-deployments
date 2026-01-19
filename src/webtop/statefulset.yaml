@@ -72,9 +72,6 @@ spec:
             - name: kasmvnc-config
               mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
               subPath: kasmvnc_defaults.yaml
-            - name: tailscale-cert
-              mountPath: /certs
-              readOnly: true
       volumes:
         - name: dshm
           emptyDir:
@@ -97,10 +94,6 @@ spec:
             items:
               - key: kasmvnc_defaults.yaml
                 path: kasmvnc_defaults.yaml
-        - name: tailscale-cert
-          hostPath:
-            path: /etc/tailscale-certs
-            type: Directory
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
