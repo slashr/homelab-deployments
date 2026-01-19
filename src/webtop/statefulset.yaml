@@ -70,6 +70,10 @@ spec:
               value: "40"
             - name: SELKIES_ENCODER
               value: "x264enc"
+            - name: DISABLE_DRI3
+              value: "false"
+            - name: DRINODE
+              value: "/dev/dri/renderD128"
           resources:
             requests:
               memory: "1500Mi"
