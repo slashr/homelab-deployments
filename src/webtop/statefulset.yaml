@@ -35,6 +35,7 @@ spec:
           - 44   # video
           - 102  # input
           - 105  # render
+          - 109  # render (Debian/Ubuntu default)
       initContainers:
         - name: install-xdotool
           image: ubuntu:jammy
@@ -44,10 +45,14 @@ spec:
             - |
               set -euo pipefail
               apt-get update -y
-              apt-get install -y xdotool
+              apt-get install -y xdotool vainfo
               mkdir -p /opt/xdotool/bin /opt/xdotool/lib
               cp -v /usr/bin/xdotool /opt/xdotool/bin/
+              cp -v /usr/bin/vainfo /opt/xdotool/bin/
               ldd /usr/bin/xdotool | awk '{print $3}' | grep -E '^/' | while read -r lib; do
+                cp -v --parents "$lib" /opt/xdotool/lib/
+              done
+              ldd /usr/bin/vainfo | awk '{print $3}' | grep -E '^/' | while read -r lib; do
                 cp -v --parents "$lib" /opt/xdotool/lib/
               done
           volumeMounts:
@@ -66,10 +71,14 @@ spec:
           env:
             - name: VNC_PW
               value: "attribute"
+            - name: DRINODE
+              value: /dev/dri/renderD128
+            - name: DRI_NODE
+              value: /dev/dri/renderD128
             - name: PATH
               value: "/opt/xdotool/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: LD_LIBRARY_PATH
-              value: "/opt/xdotool/lib"
+              value: "/opt/xdotool/lib/lib/aarch64-linux-gnu:/opt/xdotool/lib/usr/lib/aarch64-linux-gnu:/opt/xdotool/lib"
           resources:
             requests:
               memory: "1500Mi"
