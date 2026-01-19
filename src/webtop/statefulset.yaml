@@ -74,6 +74,8 @@ spec:
               value: "false"
             - name: DRINODE
               value: "/dev/dri/renderD128"
+            - name: PIXELFLUX_WAYLAND
+              value: "true"
           resources:
             requests:
               memory: "1500Mi"
