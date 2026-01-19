@@ -181,6 +181,75 @@ data:
 
     echo "[custom_startup] Desktop customized: icons removed, wallpaper set"
 
+  # Nginx proxy config - HTTP -> HTTPS for Tailscale ingress compatibility
+  nginx.conf: |
+    upstream kasmvnc {
+        server 127.0.0.1:6901;
+    }
+    server {
+        listen 8080;
+        location / {
+            proxy_pass https://kasmvnc;
+            proxy_ssl_verify off;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 86400;
+            proxy_send_timeout 86400;
+        }
+    }
+
+  # KasmVNC configuration - disable TLS for reverse proxy compatibility
+  kasmvnc_defaults.yaml: |
+    ---
+    desktop:
+      resolution:
+        width: 1024
+        height: 768
+      allow_resize: true
+      pixel_depth: 24
+      gpu:
+        hw3d: false
+        drinode: /dev/dri/renderD128
+
+    network:
+      protocol: http
+      interface: 0.0.0.0
+      websocket_port: auto
+      use_ipv4: true
+      use_ipv6: true
+      udp:
+        public_ip: auto
+        port: auto
+        payload_size: auto
+        stun_server: auto
+      ssl:
+        pem_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
+        pem_key: /etc/ssl/private/ssl-cert-snakeoil.key
+        require_ssl: false
+
+    user_session:
+      new_session_disconnects_existing_exclusive_session: false
+      concurrent_connections_prompt: false
+      concurrent_connections_prompt_timeout: 10
+      idle_timeout: never
+
+    keyboard:
+      remap_keys:
+      ignore_numlock: false
+      raw_keyboard: false
+
+    pointer:
+      enabled: true
+
+    runtime_configuration:
+      allow_client_to_override_kasm_server_settings: true
+      allow_override_standard_vnc_server_settings: true
+
   workday-keeper.sh: |
     #!/bin/bash
     set -euo pipefail

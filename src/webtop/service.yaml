@@ -12,5 +12,5 @@ spec:
   ports:
     - name: http
       port: 6901
-      targetPort: web
+      targetPort: http
       protocol: TCP
