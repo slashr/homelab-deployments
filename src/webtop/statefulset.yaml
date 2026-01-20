@@ -28,7 +28,7 @@ spec:
           - svc.cluster.local
           - cluster.local
       nodeSelector:
-        kubernetes.io/hostname: stanley-arm1
+        kubernetes.io/hostname: jim-pi
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:8081e48e-ls272
