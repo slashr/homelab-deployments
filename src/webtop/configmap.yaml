@@ -4,6 +4,7 @@ metadata:
   name: webtop-scripts
   namespace: webtop
 data:
+  TIMEZONE: Europe/Berlin
   # =============================================================================
   # MMOVER - Prevents idle timeout
   # Runs Mon-Fri with daily randomized times, excludes holidays and vacations

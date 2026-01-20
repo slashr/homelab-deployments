@@ -42,6 +42,11 @@ spec:
           env:
             - name: VNC_PW
               value: "attribute"
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: webtop-scripts
+                  key: TIMEZONE
             - name: KASM_SVC_UPLOADS
               value: "0"
             - name: KASM_SVC_GAMEPAD
