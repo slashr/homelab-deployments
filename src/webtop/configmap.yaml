@@ -128,9 +128,15 @@ data:
     CACHE_DIR="/config/.cache/chromium"
     mkdir -p "$PROFILE_DIR" "$CACHE_DIR" /config/.config /config/.cache /config/.local/share
     chown -R abc:abc /config/.config /config/.cache /config/.local
+    # Clean all lock files
     rm -f "$PROFILE_DIR/SingletonLock" "$PROFILE_DIR/SingletonCookie" "$PROFILE_DIR/SingletonSocket"
-    rm -f "$PROFILE_DIR/Default/SingletonLock" "$PROFILE_DIR/Default/SingletonCookie" "$PROFILE_DIR/Default/SingletonSocket"
-    # Reset crash state to prevent "profile error" dialog
+    find "$PROFILE_DIR" -name "LOCK" -delete 2>/dev/null || true
+    find "$PROFILE_DIR" -name "SingletonLock" -delete 2>/dev/null || true
+    find "$PROFILE_DIR" -name "SingletonCookie" -delete 2>/dev/null || true
+    find "$PROFILE_DIR" -name "SingletonSocket" -delete 2>/dev/null || true
+    # Remove commonly corrupted files (Chromium will regenerate them)
+    rm -f "$PROFILE_DIR/Default/Web Data" "$PROFILE_DIR/Default/Web Data-journal"
+    # Reset crash state to prevent restore dialog
     if [[ -f "$PROFILE_DIR/Default/Preferences" ]]; then
       sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/g' "$PROFILE_DIR/Default/Preferences"
       sed -i 's/"exited_cleanly":false/"exited_cleanly":true/g' "$PROFILE_DIR/Default/Preferences"
