@@ -44,6 +44,13 @@ spec:
                   - -c
                   - |
                     sleep 30 && /scripts/setup.sh &
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    /scripts/chromium-close.sh; sleep 2
           ports:
             - name: web
               containerPort: 3000
