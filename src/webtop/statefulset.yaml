@@ -82,6 +82,8 @@ spec:
               mountPath: /tmp
             - name: custom-scripts
               mountPath: /scripts
+            - name: dri
+              mountPath: /dev/dri
       volumes:
         - name: dshm
           emptyDir:
@@ -91,9 +93,6 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 512Mi
-          configMap:
-            name: webtop-scripts
-            defaultMode: 0755
         - name: custom-scripts
           configMap:
             name: webtop-scripts
