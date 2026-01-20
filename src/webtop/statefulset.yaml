@@ -12,9 +12,8 @@ spec:
     metadata:
       labels: { app: webtop }
       annotations:
-        # Velero pre-backup hook: flush filesystem and gracefully signal Chromium to save
         backup.velero.io/backup-volumes: webtop-data
-        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 firefox-esr 2>/dev/null; sync"]'
+        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 chromium 2>/dev/null; sync"]'
         pre.hook.backup.velero.io/timeout: "30s"
     spec:
       dnsPolicy: None
@@ -29,42 +28,55 @@ spec:
           - cluster.local
       nodeSelector:
         kubernetes.io/hostname: jim-pi
+      initContainers:
+        - name: setup-scripts
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mkdir -p /config/custom-cont-init.d
+              cp /scripts-init/* /config/custom-cont-init.d/
+              chmod +x /config/custom-cont-init.d/*
+          volumeMounts:
+            - name: webtop-data
+              mountPath: /config
+            - name: init-scripts
+              mountPath: /scripts-init
       containers:
         - name: webtop
-          image: kasmweb/debian-trixie-desktop:1.18.0
+          image: lscr.io/linuxserver/webtop:latest
           securityContext:
             privileged: true
           ports:
             - name: web
-              containerPort: 6901
-              hostPort: 6901
+              containerPort: 3000
               protocol: TCP
           env:
-            - name: VNC_PW
-              value: "attribute"
-            - name: KASM_SVC_UPLOADS
-              value: "0"
-            - name: KASM_SVC_GAMEPAD
-              value: "0"
-            - name: KASM_SVC_WEBCAM
-              value: "0"
-            - name: KASM_SVC_PRINTER
-              value: "0"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: webtop-scripts
+                  key: TIMEZONE
           resources:
             requests:
-              memory: "1500Mi"
-              cpu: "2"
+              memory: "1Gi"
+              cpu: "250m"
             limits:
-              memory: "4Gi"
-              cpu: "3"
+              memory: "3Gi"
           readinessProbe:
             tcpSocket:
-              port: 6901
+              port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
-              port: 6901
+              port: 3000
             initialDelaySeconds: 60
             periodSeconds: 30
           volumeMounts:
@@ -74,43 +86,35 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
-            - name: custom-startup
-              mountPath: /dockerstartup/custom_startup.sh
-              subPath: custom_startup.sh
-            - name: kasmvnc-config
-              mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
-              subPath: kasmvnc_defaults.yaml
+            - name: dri
+              mountPath: /dev/dri
             - name: scripts
               mountPath: /scripts
       volumes:
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
         - name: tmp
           emptyDir:
             medium: Memory
-            sizeLimit: 256Mi
-        - name: custom-startup
+            sizeLimit: 512Mi
+        - name: dri
+          hostPath:
+            path: /dev/dri
+            type: Directory
+        - name: init-scripts
           configMap:
             name: webtop-scripts
             defaultMode: 0755
             items:
-              - key: custom_startup.sh
-                path: custom_startup.sh
-        - name: kasmvnc-config
-          configMap:
-            name: webtop-scripts
-            items:
-              - key: kasmvnc_defaults.yaml
-                path: kasmvnc_defaults.yaml
+              - key: init-cron.sh
+                path: init-cron.sh
         - name: scripts
           configMap:
             name: webtop-scripts
             defaultMode: 0755
             items:
-              - key: setup.sh
-                path: setup.sh
               - key: mmover.sh
                 path: mmover.sh
               - key: ff-o.sh

@@ -11,6 +11,6 @@ spec:
     app: webtop
   ports:
     - name: http
-      port: 6901
+      port: 3000
       targetPort: web
       protocol: TCP

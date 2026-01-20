@@ -4,65 +4,40 @@ metadata:
   name: webtop-scripts
   namespace: webtop
 data:
-  # =============================================================================
-  # MMOVER - Prevents idle timeout
-  # Runs Mon-Fri with daily randomized times, excludes holidays and vacations
-  #
-  # Ranges:
-  #   Start: 08:30 - 09:30
-  #   Pause: 12:15-12:35 to 13:20-13:40
-  #   End:   17:30 - 18:30
-  # =============================================================================
-
-  setup.sh: |
-    #!/bin/bash
+  TIMEZONE: Europe/Berlin
+  init-cron.sh: |
+    #!/bin/sh
     set -e
-    # Setup cron for workday-keeper
-    crontab -l 2>/dev/null | grep -v workday > /tmp/crontab.tmp || true
+    log() { echo "[webtop-init] $1" > /proc/1/fd/1 2>/dev/null || true; }
+
+    # Ensure cron daemon is running (Alpine uses crond)
+    if command -v crond >/dev/null 2>&1; then
+      crond 2>/dev/null || true
+      log "crond started"
+    fi
+
+    # Install cron entry for workday-keeper (Mon-Fri every 3 minutes)
+    crontab -l 2>/dev/null | grep -v workday-keeper > /tmp/crontab.tmp || true
     echo "*/3 * * * 1-5 /scripts/workday-keeper.sh" >> /tmp/crontab.tmp
     crontab /tmp/crontab.tmp
-
-    # Patch selkies startup to use performance-optimized settings
-    SELKIES_RUN="/etc/s6-overlay/s6-rc.d/svc-selkies/run"
-    if [ -f "$SELKIES_RUN" ] && ! grep -q "framerate" "$SELKIES_RUN"; then
-      sed -i 's|selkies \\|selkies \\\n    --framerate="${SELKIES_FRAMERATE:-10}" \\\n    --h264-crf="${SELKIES_H264_CRF:-40}" \\|' "$SELKIES_RUN"
-      # Restart selkies to apply new settings
-      s6-svc -r /run/service/svc-selkies 2>/dev/null || true
-      echo "[$(date '+%Y-%m-%d %H:%M:%S')] selkies: patched with framerate=${SELKIES_FRAMERATE:-10} crf=${SELKIES_H264_CRF:-40}" > /proc/1/fd/1
-    fi
-
-    # Install Mesa/VAAPI tooling for GPU diagnostics (Debian-based images)
-    if command -v apt-get >/dev/null 2>&1; then
-      apt-get update -y >/dev/null 2>&1 || true
-      apt-get install -y mesa-utils vainfo mesa-va-drivers libva-drm2 libva2 >/dev/null 2>&1 || true
-    fi
-    if command -v glxinfo >/dev/null 2>&1; then
-      glxinfo -B 2>/dev/null | egrep 'OpenGL vendor|OpenGL renderer|OpenGL version' \
-        | sed 's/^/[glxinfo] /' > /proc/1/fd/1
-    fi
-    if command -v vainfo >/dev/null 2>&1; then
-      vainfo 2>/dev/null | head -n 50 | sed 's/^/[vainfo] /' > /proc/1/fd/1
-    fi
+    log "cron installed: workday-keeper"
 
   mmover.sh: |
-    #!/bin/bash
+    #!/bin/sh
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
 
-    # 1. Random delay before action (0-90 seconds jitter)
     jitter=$((RANDOM % 90))
-    sleep $jitter
+    sleep "$jitter"
 
-    # Randomly choose action type: 0=mouse move, 1=scroll, 2=window cycle
     action=$((RANDOM % 3))
 
-    case $action in
+    case "$action" in
       0)
-        # 2. Smooth mouse movement (multiple small steps)
-        eval $(xdotool getmouselocation --shell)
+        eval "$(xdotool getmouselocation --shell)"
         dist=$((20 + RANDOM % 60))
         dir=$((RANDOM % 8))
-        case $dir in
+        case "$dir" in
           0) dx=$dist;  dy=0 ;;
           1) dx=$dist;  dy=$dist ;;
           2) dx=0;      dy=$dist ;;
@@ -74,46 +49,44 @@ data:
         esac
         NEW_X=$((X + dx))
         NEW_Y=$((Y + dy))
-        (( NEW_X < 10 )) && NEW_X=10
-        (( NEW_Y < 10 )) && NEW_Y=10
-        (( NEW_X > 3000 )) && NEW_X=3000
-        (( NEW_Y > 2000 )) && NEW_Y=2000
+        [ "$NEW_X" -lt 10 ] && NEW_X=10
+        [ "$NEW_Y" -lt 10 ] && NEW_Y=10
+        [ "$NEW_X" -gt 3000 ] && NEW_X=3000
+        [ "$NEW_Y" -gt 2000 ] && NEW_Y=2000
 
-        # Move in 5-10 small steps with variable delays
         steps=$((5 + RANDOM % 6))
         step_dx=$(( (NEW_X - X) / steps ))
         step_dy=$(( (NEW_Y - Y) / steps ))
         cur_x=$X
         cur_y=$Y
-        for _ in $(seq 1 $((steps - 1))); do
+        i=1
+        while [ "$i" -lt "$steps" ]; do
           cur_x=$((cur_x + step_dx))
           cur_y=$((cur_y + step_dy))
-          xdotool mousemove $cur_x $cur_y
-          # 4. Variable micro-pause (10-50ms)
+          xdotool mousemove "$cur_x" "$cur_y"
           sleep 0.0$((10 + RANDOM % 40))
+          i=$((i + 1))
         done
-        xdotool mousemove $NEW_X $NEW_Y
+        xdotool mousemove "$NEW_X" "$NEW_Y"
         log "mmover: mouse ($X,$Y) -> ($NEW_X,$NEW_Y) [${steps} steps, ${jitter}s jitter]"
         ;;
       1)
-        # 3. Scroll - sometimes one-way, sometimes return
         scroll_amount=$((1 + RANDOM % 3))
-        scroll_dir=$((RANDOM % 2))  # 0=down, 1=up
-        return_scroll=$((RANDOM % 3))  # 0=return, 1,2=one-way
+        scroll_dir=$((RANDOM % 2))
+        return_scroll=$((RANDOM % 3))
 
-        if [[ $scroll_dir -eq 0 ]]; then
-          for _ in $(seq 1 $scroll_amount); do xdotool click 5; done
+        if [ "$scroll_dir" -eq 0 ]; then
+          i=1; while [ "$i" -le "$scroll_amount" ]; do xdotool click 5; i=$((i+1)); done
         else
-          for _ in $(seq 1 $scroll_amount); do xdotool click 4; done
+          i=1; while [ "$i" -le "$scroll_amount" ]; do xdotool click 4; i=$((i+1)); done
         fi
 
-        if [[ $return_scroll -eq 0 ]]; then
-          # 4. Variable pause before scrolling back (0.2-0.8s)
+        if [ "$return_scroll" -eq 0 ]; then
           sleep 0.$((2 + RANDOM % 6))
-          if [[ $scroll_dir -eq 0 ]]; then
-            for _ in $(seq 1 $scroll_amount); do xdotool click 4; done
+          if [ "$scroll_dir" -eq 0 ]; then
+            i=1; while [ "$i" -le "$scroll_amount" ]; do xdotool click 4; i=$((i+1)); done
           else
-            for _ in $(seq 1 $scroll_amount); do xdotool click 5; done
+            i=1; while [ "$i" -le "$scroll_amount" ]; do xdotool click 5; i=$((i+1)); done
           fi
           log "mmover: scroll ($scroll_amount lines, return) [${jitter}s jitter]"
         else
@@ -121,170 +94,46 @@ data:
         fi
         ;;
       2)
-        # Window focus cycling (alt+tab twice to return)
         xdotool key alt+Tab
-        # 4. Variable pause (0.3-1.2s)
         sleep 0.$((3 + RANDOM % 9))
         xdotool key alt+Tab
         log "mmover: window cycle [${jitter}s jitter]"
         ;;
     esac
 
-    TS=$(date +%s)000000000
-    curl -sf -X POST "http://signoz-otel-collector.signoz.svc.cluster.local:4318/v1/metrics" \
-      -H "Content-Type: application/json" \
-      -d "{\"resourceMetrics\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"mmover\"}}]},\"scopeMetrics\":[{\"metrics\":[{\"name\":\"mmover.heartbeat\",\"gauge\":{\"dataPoints\":[{\"asInt\":1,\"timeUnixNano\":\"$TS\"}]}}]}]}]}" \
-      >/dev/null 2>&1 || true
-
   ff-o.sh: |
-    #!/bin/bash
+    #!/bin/sh
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
-    FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
+    BROWSER_ALREADY_FLAG="/tmp/browser-open.already"
     export DISPLAY=:1
 
-    if pgrep -x firefox-esr >/dev/null; then
-      if [[ ! -f "$FIREFOX_ALREADY_FLAG" ]]; then
-        log "ff: already running"
-        touch "$FIREFOX_ALREADY_FLAG"
+    if pgrep -x chromium >/dev/null; then
+      if [ ! -f "$BROWSER_ALREADY_FLAG" ]; then
+        log "browser: already running"
+        touch "$BROWSER_ALREADY_FLAG"
       fi
       exit 0
     fi
 
-    rm -f "$FIREFOX_ALREADY_FLAG"
-    log "ff: starting"
-    DISPLAY=:1 firefox-esr &
+    rm -f "$BROWSER_ALREADY_FLAG"
+    log "browser: starting"
+    DISPLAY=:1 chromium &
 
   ff-c.sh: |
-    #!/bin/bash
+    #!/bin/sh
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
-    FIREFOX_ALREADY_FLAG="/tmp/firefox-open.already"
-    if pgrep -x firefox-esr >/dev/null; then
-      pkill -x firefox-esr
-      log "ff: closed"
+    BROWSER_ALREADY_FLAG="/tmp/browser-open.already"
+    if pgrep -x chromium >/dev/null; then
+      pkill -x chromium
+      log "browser: closed"
     else
-      log "ff: already closed"
+      log "browser: already closed"
     fi
-    rm -f "$FIREFOX_ALREADY_FLAG"
-
-  custom_startup.sh: |
-    #!/bin/bash
-    # Kasm custom startup script - runs after desktop is ready
-
-    # Persist Firefox profile to /config (PVC)
-    mkdir -p /config/.mozilla
-    if [ ! -L ~/.mozilla ]; then
-      rm -rf ~/.mozilla
-      ln -s /config/.mozilla ~/.mozilla
-    fi
-
-    # Remove all desktop icons
-    rm -f ~/Desktop/*.desktop 2>/dev/null || true
-
-    # Download and set wallpaper
-    curl -sL -o ~/wallpaper.jpg "https://m.media-amazon.com/images/I/91ZItuM6veL.jpg"
-
-    # Set wallpaper for all possible monitor names
-    for monitor in "VNC-0" "Virtual-1" "default"; do
-      xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor${monitor}/workspace0/last-image -s ~/wallpaper.jpg 2>/dev/null || true
-    done
-
-    echo "[custom_startup] Desktop customized: icons removed, wallpaper set"
-
-  # Nginx proxy config - HTTP -> HTTPS for Tailscale ingress compatibility
-  nginx.conf: |
-    map $http_upgrade $connection_upgrade {
-        default upgrade;
-        '' close;
-    }
-    upstream kasmvnc {
-        server 127.0.0.1:6901;
-    }
-    server {
-        listen 8080;
-
-        # Disable buffering for real-time streaming
-        proxy_buffering off;
-        proxy_request_buffering off;
-
-        location / {
-            proxy_pass https://kasmvnc;
-            proxy_ssl_verify off;
-            proxy_http_version 1.1;
-
-            # WebSocket support
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection $connection_upgrade;
-
-            # Pass original headers
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto https;
-
-            # Long timeouts for persistent connections
-            proxy_connect_timeout 7d;
-            proxy_read_timeout 7d;
-            proxy_send_timeout 7d;
-
-            # Disable buffering
-            proxy_buffering off;
-            proxy_cache off;
-
-            # TCP optimizations
-            tcp_nodelay on;
-        }
-    }
-
-  # KasmVNC configuration - use Tailscale cert for valid HTTPS
-  kasmvnc_defaults.yaml: |
-    ---
-    desktop:
-      resolution:
-        width: 1024
-        height: 768
-      allow_resize: true
-      pixel_depth: 24
-      gpu:
-        hw3d: false
-        drinode: /dev/dri/renderD128
-
-    network:
-      protocol: http
-      interface: 0.0.0.0
-      websocket_port: auto
-      use_ipv4: true
-      use_ipv6: true
-      udp:
-        public_ip: auto
-        port: auto
-        payload_size: auto
-        stun_server: auto
-      ssl:
-        pem_certificate: /certs/jim-pi.taimen-yo.ts.net.crt
-        pem_key: /certs/jim-pi.taimen-yo.ts.net.key
-        require_ssl: true
-
-    user_session:
-      new_session_disconnects_existing_exclusive_session: false
-      concurrent_connections_prompt: false
-      concurrent_connections_prompt_timeout: 10
-      idle_timeout: never
-
-    keyboard:
-      remap_keys:
-      ignore_numlock: false
-      raw_keyboard: false
-
-    pointer:
-      enabled: true
-
-    runtime_configuration:
-      allow_client_to_override_kasm_server_settings: true
-      allow_override_standard_vnc_server_settings: true
+    rm -f "$BROWSER_ALREADY_FLAG"
 
   workday-keeper.sh: |
-    #!/bin/bash
-    set -euo pipefail
+    #!/bin/sh
+    set -eu
 
     STATE_FILE="/tmp/workday-keeper.state"
     SCHEDULE_FILE="/tmp/workday-schedule"
@@ -292,27 +141,23 @@ data:
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
 
     minutes_since_midnight() {
-      local h m
       h="$(date +%H)"; m="$(date +%M)"
       echo $((10#$h * 60 + 10#$m))
     }
 
     rand() {
-      local seed=$1 idx=$2 max=$3
+      seed=$1; idx=$2; max=$3
       echo $(( (seed * 31 + idx * 17) % max ))
     }
 
-    # Skip weekends
     dow="$(date +%u)"
-    [[ "$dow" -gt 5 ]] && exit 0
+    [ "$dow" -gt 5 ] && exit 0
 
-    # Public holidays (MMDD format)
     HOLIDAYS_2025="0101 0308 0418 0421 0501 0529 0609 1003 1225 1226"
     HOLIDAYS_2026="0101 0308 0403 0406 0501 0514 0525 1003 1225 1226"
     HOLIDAYS_2027="0101 0308 0326 0329 0501 0506 0517 1003 1225 1226"
     HOLIDAYS_2028="0101 0308 0414 0417 0501 0525 0605 1003 1225 1226"
 
-    # Vacations (MMDD or MMDD-MMDD range)
     VACATIONS_2025=""
     VACATIONS_2026="0107 0320-0406"
     VACATIONS_2027=""
@@ -322,40 +167,36 @@ data:
     mmdd=$(date +%m%d)
     mmdd_num=$((10#$mmdd))
 
-    holidays_var="HOLIDAYS_$year"
-    holidays="${!holidays_var:-}"
-    if [[ " $holidays " == *" $mmdd "* ]]; then
-      log "holiday: skipping"
-      exit 0
-    fi
+    holidays_var="HOLIDAYS_${year}"
+    holidays=$(eval echo \$${holidays_var} || true)
+    echo " $holidays " | grep -q " $mmdd " && { log "holiday: skipping"; exit 0; }
 
-    vacations_var="VACATIONS_$year"
-    vacations="${!vacations_var:-}"
+    vacations_var="VACATIONS_${year}"
+    vacations=$(eval echo \$${vacations_var} || true)
     for v in $vacations; do
-      if [[ "$v" == *-* ]]; then
-        start="${v%-*}"; end="${v#*-}"
-        start_num=$((10#$start))
-        end_num=$((10#$end))
-        if (( mmdd_num >= start_num && mmdd_num <= end_num )); then
-          log "vacation: skipping"
-          exit 0
-        fi
-      elif [[ "$v" == "$mmdd" ]]; then
-        log "vacation: skipping"
-        exit 0
-      fi
+      case "$v" in
+        *-*)
+          start=${v%-*}; end=${v#*-}
+          start_num=$((10#$start))
+          end_num=$((10#$end))
+          if [ "$mmdd_num" -ge "$start_num" ] && [ "$mmdd_num" -le "$end_num" ]; then
+            log "vacation: skipping"; exit 0
+          fi
+          ;;
+        *)
+          [ "$v" = "$mmdd" ] && { log "vacation: skipping"; exit 0; }
+          ;;
+      esac
     done
 
-    # Daily randomized schedule
     day_seed=$(date +%Y%m%d)
-    start=$((510 + $(rand $day_seed 1 60)))   # 8:30 + 0-59 min
-    end=$((1050 + $(rand $day_seed 2 60)))    # 17:30 + 0-59 min
-    p1=$((735 + $(rand $day_seed 3 20)))      # 12:15 + 0-19 min
-    p2=$((800 + $(rand $day_seed 4 20)))      # 13:20 + 0-19 min
+    start=$((510 + $(rand $day_seed 1 60)))
+    end=$((1050 + $(rand $day_seed 2 60)))
+    p1=$((735 + $(rand $day_seed 3 20)))
+    p2=$((800 + $(rand $day_seed 4 20)))
 
-    # Log schedule once per day
     today=$(date +%Y-%m-%d)
-    if [[ ! -f "$SCHEDULE_FILE" ]] || [[ "$(cat "$SCHEDULE_FILE" 2>/dev/null)" != "$today" ]]; then
+    if [ ! -f "$SCHEDULE_FILE" ] || [ "$(cat "$SCHEDULE_FILE" 2>/dev/null)" != "$today" ]; then
       log "schedule: start=$(printf '%02d:%02d' $((start/60)) $((start%60))) pause=$(printf '%02d:%02d' $((p1/60)) $((p1%60)))-$(printf '%02d:%02d' $((p2/60)) $((p2%60))) end=$(printf '%02d:%02d' $((end/60)) $((end%60)))"
       echo "$today" > "$SCHEDULE_FILE"
     fi
@@ -363,41 +204,34 @@ data:
     t="$(minutes_since_midnight)"
 
     in_work_window=false
-    if (( t >= start && t <= end )); then
-      if ! (( t >= p1 && t < p2 )); then
+    if [ "$t" -ge "$start" ] && [ "$t" -le "$end" ]; then
+      if ! ([ "$t" -ge "$p1" ] && [ "$t" -lt "$p2" ]); then
         in_work_window=true
       fi
     fi
 
     prev="unknown"
-    [[ -f "$STATE_FILE" ]] && prev="$(cat "$STATE_FILE" || true)"
+    [ -f "$STATE_FILE" ] && prev="$(cat "$STATE_FILE" 2>/dev/null || true)"
 
-    if [[ "$in_work_window" == "true" ]]; then
-      if [[ "$prev" != "open" ]]; then
-        # Determine reason for opening
-        if (( t >= p2 )); then
-          log "ff: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
+    if [ "$in_work_window" = "true" ]; then
+      if [ "$prev" != "open" ]; then
+        if [ "$t" -ge "$p2" ]; then
+          log "browser: opened (break over $(printf '%02d:%02d' $((p2/60)) $((p2%60))))"
         else
-          log "ff: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
+          log "browser: opened (work starts $(printf '%02d:%02d' $((start/60)) $((start%60))))"
         fi
         /scripts/ff-o.sh || true
         echo "open" > "$STATE_FILE"
       fi
       /scripts/mmover.sh
     else
-      if [[ "$prev" != "closed" ]]; then
-        # Determine reason for closing
-        if (( t >= p1 && t < p2 )); then
-          log "ff: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
+      if [ "$prev" != "closed" ]; then
+        if [ "$t" -ge "$p1" ] && [ "$t" -lt "$p2" ]; then
+          log "browser: closed (break starts $(printf '%02d:%02d' $((p1/60)) $((p1%60))))"
         else
-          log "ff: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
+          log "browser: closed (work over $(printf '%02d:%02d' $((end/60)) $((end%60))))"
         fi
         /scripts/ff-c.sh || true
         echo "closed" > "$STATE_FILE"
-      fi
-      # Log every 15 min during off-hours (at :00, :15, :30, :45)
-      minute=$(date +%M)
-      if (( 10#$minute % 15 < 3 )); then
-        log "off-hours: no activity"
       fi
     fi
