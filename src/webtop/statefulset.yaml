@@ -33,9 +33,9 @@ spec:
         - name: webtop
           image: lscr.io/linuxserver/webtop:alpine-i3
           securityContext:
-            privileged: true
             seccompProfile:
               type: Unconfined
+            privileged: true
           lifecycle:
             postStart:
               exec:
