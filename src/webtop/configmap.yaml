@@ -124,14 +124,15 @@ data:
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
-    PROFILE_DIR="/config/.config/chromium"
-    mkdir -p "$PROFILE_DIR" /config/.cache /config/.local/share
-    chown -R abc:abc /config/.config /config/.cache /config/.local
+    PROFILE_DIR="/tmp/chromium-profile"
+    CACHE_DIR="/tmp/chromium-cache"
+    mkdir -p "$PROFILE_DIR" "$CACHE_DIR"
+    chown -R abc:abc "$PROFILE_DIR" "$CACHE_DIR"
     rm -f "$PROFILE_DIR/SingletonLock" "$PROFILE_DIR/SingletonCookie" "$PROFILE_DIR/SingletonSocket"
     if pgrep -x chromium >/dev/null; then
       log "chromium: already running"
     else
-      su -s /bin/bash -c "DISPLAY=:1 XDG_CONFIG_HOME=/config/.config XDG_CACHE_HOME=/config/.cache XDG_DATA_HOME=/config/.local/share chromium --no-first-run --no-default-browser-check --start-maximized --user-data-dir=$PROFILE_DIR &" abc
+      su -s /bin/bash -c "DISPLAY=:1 chromium --no-first-run --no-default-browser-check --start-maximized --user-data-dir=$PROFILE_DIR --disk-cache-dir=$CACHE_DIR &" abc
     fi
 
   chromium-close.sh: |
