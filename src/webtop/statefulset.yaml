@@ -34,22 +34,6 @@ spec:
           image: kasmweb/debian-trixie-desktop:1.18.0
           securityContext:
             privileged: true
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/bash
-                  - -lc
-                  - |
-                    if command -v apt-get >/dev/null 2>&1; then
-                      sudo -n apt-get update -y >/dev/null 2>&1 || true
-                      sudo -n apt-get install -y cron >/dev/null 2>&1 || true
-                    fi
-                    if command -v cron >/dev/null 2>&1; then
-                      sudo -n cron >/dev/null 2>&1 || true
-                    elif [ -x /usr/sbin/cron ]; then
-                      sudo -n /usr/sbin/cron >/dev/null 2>&1 || true
-                    fi
           ports:
             - name: web
               containerPort: 6901
