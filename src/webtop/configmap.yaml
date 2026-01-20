@@ -22,6 +22,8 @@ data:
     crontab /tmp/crontab.tmp
     # Restart cron so it picks up the new crontab
     s6-svc -r /run/service/svc-cron || true
+    # Open Chromium on pod start (best-effort)
+    /scripts/chromium-open.sh || true
 
   mmover.sh: |
     #!/bin/bash
