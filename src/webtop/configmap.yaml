@@ -136,6 +136,11 @@ data:
     find "$PROFILE_DIR" -name "SingletonSocket" -delete 2>/dev/null || true
     # Remove commonly corrupted files (Chromium will regenerate them)
     rm -f "$PROFILE_DIR/Default/Web Data" "$PROFILE_DIR/Default/Web Data-journal"
+    rm -f "$PROFILE_DIR/Default/Favicons" "$PROFILE_DIR/Default/Favicons-journal"
+    rm -f "$PROFILE_DIR/Default/History" "$PROFILE_DIR/Default/History-journal"
+    rm -f "$PROFILE_DIR/Default/Login Data" "$PROFILE_DIR/Default/Login Data-journal"
+    rm -f "$PROFILE_DIR/Default/Network Action Predictor" "$PROFILE_DIR/Default/Network Action Predictor-journal"
+    rm -f "$PROFILE_DIR/Local State"
     # Reset crash state to prevent restore dialog
     if [[ -f "$PROFILE_DIR/Default/Preferences" ]]; then
       sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/g' "$PROFILE_DIR/Default/Preferences"
@@ -144,7 +149,7 @@ data:
     if pgrep -x chromium >/dev/null; then
       log "chromium: already running"
     else
-      su -s /bin/bash -c "DISPLAY=:1 HOME=/config XDG_CONFIG_HOME=/config/.config XDG_CACHE_HOME=/config/.cache XDG_DATA_HOME=/config/.local/share chromium --no-first-run --no-default-browser-check --start-maximized --user-data-dir=$PROFILE_DIR --disk-cache-dir=$CACHE_DIR &" abc
+      su -s /bin/bash -c "DISPLAY=:1 HOME=/config XDG_CONFIG_HOME=/config/.config XDG_CACHE_HOME=/config/.cache XDG_DATA_HOME=/config/.local/share chromium --no-first-run --no-default-browser-check --start-maximized --disable-session-crashed-bubble --user-data-dir=$PROFILE_DIR --disk-cache-dir=$CACHE_DIR &" abc
     fi
 
   chromium-close.sh: |
