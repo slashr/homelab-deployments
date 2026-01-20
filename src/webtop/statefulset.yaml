@@ -31,7 +31,7 @@ spec:
         kubernetes.io/hostname: jim-pi
       containers:
         - name: webtop
-          image: lscr.io/linuxserver/webtop:8081e48e-ls272
+          image: lscr.io/linuxserver/webtop:arm64v8-debian-xfce
           securityContext:
             seccompProfile:
               type: Unconfined
