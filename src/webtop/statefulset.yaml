@@ -28,10 +28,10 @@ spec:
           - svc.cluster.local
           - cluster.local
       nodeSelector:
-        kubernetes.io/hostname: jim-pi
+        kubernetes.io/hostname: stanley-arm1
       containers:
         - name: webtop
-          image: lscr.io/linuxserver/webtop:alpine-i3
+          image: lscr.io/linuxserver/webtop:8081e48e-ls272
           securityContext:
             seccompProfile:
               type: Unconfined
@@ -55,25 +55,12 @@ spec:
               value: "1000"
             - name: TZ
               value: "Europe/Amsterdam"
-            - name: SELKIES_MANUAL_WIDTH
-              value: "1024"
-            - name: SELKIES_MANUAL_HEIGHT
-              value: "768"
-            - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
-              value: "true"
-            - name: SELKIES_FRAMERATE
-              value: "10"
-            - name: SELKIES_H264_CRF
-              value: "40"
-            - name: SELKIES_ENCODER
-              value: "x264enc"
           resources:
             requests:
-              memory: "1500Mi"
-              cpu: "2"
+              memory: "1Gi"
+              cpu: "250m"
             limits:
-              memory: "4Gi"
-              cpu: "3"
+              memory: "6Gi"
           readinessProbe:
             httpGet:
               path: /
@@ -95,17 +82,18 @@ spec:
               mountPath: /tmp
             - name: custom-scripts
               mountPath: /scripts
-            - name: dri
-              mountPath: /dev/dri
       volumes:
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
         - name: tmp
           emptyDir:
             medium: Memory
-            sizeLimit: 256Mi
+            sizeLimit: 512Mi
+          configMap:
+            name: webtop-scripts
+            defaultMode: 0755
         - name: custom-scripts
           configMap:
             name: webtop-scripts
