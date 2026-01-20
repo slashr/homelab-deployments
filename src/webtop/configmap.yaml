@@ -124,10 +124,12 @@ data:
     #!/bin/bash
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" > /proc/1/fd/1 2>/dev/null || true; }
     export DISPLAY=:1
+    mkdir -p /config/.config/chromium
+    chown -R abc:abc /config/.config/chromium
     if pgrep -x chromium >/dev/null; then
       log "chromium: already running"
     else
-      su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized &" abc
+      su -s /bin/bash -c "DISPLAY=:1 chromium --start-maximized --user-data-dir=/config/.config/chromium &" abc
     fi
 
   chromium-close.sh: |
