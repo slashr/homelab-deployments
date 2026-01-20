@@ -14,7 +14,7 @@ spec:
       annotations:
         # Velero pre-backup hook: flush filesystem and gracefully signal Chromium to save
         backup.velero.io/backup-volumes: webtop-data
-        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 firefox-esr 2>/dev/null; sync"]'
+        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pkill -SIGUSR1 chromium 2>/dev/null; sync"]'
         pre.hook.backup.velero.io/timeout: "30s"
     spec:
       dnsPolicy: None
@@ -31,25 +31,42 @@ spec:
         kubernetes.io/hostname: jim-pi
       containers:
         - name: webtop
-          image: kasmweb/debian-trixie-desktop:1.18.0
+          image: lscr.io/linuxserver/webtop:alpine-i3
           securityContext:
             privileged: true
+            seccompProfile:
+              type: Unconfined
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    sleep 30 && /scripts/setup.sh &
           ports:
             - name: web
-              containerPort: 6901
-              hostPort: 6901
+              containerPort: 3000
               protocol: TCP
           env:
-            - name: VNC_PW
-              value: "attribute"
-            - name: KASM_SVC_UPLOADS
-              value: "0"
-            - name: KASM_SVC_GAMEPAD
-              value: "0"
-            - name: KASM_SVC_WEBCAM
-              value: "0"
-            - name: KASM_SVC_PRINTER
-              value: "0"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: SELKIES_MANUAL_WIDTH
+              value: "1024"
+            - name: SELKIES_MANUAL_HEIGHT
+              value: "768"
+            - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
+              value: "true"
+            - name: SELKIES_FRAMERATE
+              value: "10"
+            - name: SELKIES_H264_CRF
+              value: "40"
+            - name: SELKIES_ENCODER
+              value: "x264enc"
           resources:
             requests:
               memory: "1500Mi"
@@ -58,13 +75,15 @@ spec:
               memory: "4Gi"
               cpu: "3"
           readinessProbe:
-            tcpSocket:
-              port: 6901
+            httpGet:
+              path: /
+              port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
-            tcpSocket:
-              port: 6901
+            httpGet:
+              path: /
+              port: 3000
             initialDelaySeconds: 60
             periodSeconds: 30
           volumeMounts:
@@ -74,14 +93,10 @@ spec:
               mountPath: /dev/shm
             - name: tmp
               mountPath: /tmp
-            - name: custom-startup
-              mountPath: /dockerstartup/custom_startup.sh
-              subPath: custom_startup.sh
-            - name: kasmvnc-config
-              mountPath: /usr/share/kasmvnc/kasmvnc_defaults.yaml
-              subPath: kasmvnc_defaults.yaml
-            - name: scripts
+            - name: custom-scripts
               mountPath: /scripts
+            - name: dri
+              mountPath: /dev/dri
       volumes:
         - name: dshm
           emptyDir:
@@ -91,34 +106,14 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 256Mi
-        - name: custom-startup
+        - name: custom-scripts
           configMap:
             name: webtop-scripts
             defaultMode: 0755
-            items:
-              - key: custom_startup.sh
-                path: custom_startup.sh
-        - name: kasmvnc-config
-          configMap:
-            name: webtop-scripts
-            items:
-              - key: kasmvnc_defaults.yaml
-                path: kasmvnc_defaults.yaml
-        - name: scripts
-          configMap:
-            name: webtop-scripts
-            defaultMode: 0755
-            items:
-              - key: setup.sh
-                path: setup.sh
-              - key: mmover.sh
-                path: mmover.sh
-              - key: ff-o.sh
-                path: ff-o.sh
-              - key: ff-c.sh
-                path: ff-c.sh
-              - key: workday-keeper.sh
-                path: workday-keeper.sh
+        - name: dri
+          hostPath:
+            path: /dev/dri
+            type: Directory
   volumeClaimTemplates:
     - metadata:
         name: webtop-data
