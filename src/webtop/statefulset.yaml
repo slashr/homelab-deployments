@@ -63,15 +63,15 @@ spec:
             - name: TZ
               value: "Europe/Amsterdam"
             - name: SELKIES_MANUAL_WIDTH
-              value: "1366"
+              value: "1280"
             - name: SELKIES_MANUAL_HEIGHT
-              value: "768"
+              value: "720"
             - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
               value: "true"
             - name: SELKIES_FRAMERATE
-              value: "24"
+              value: "20"
             - name: SELKIES_H264_CRF
-              value: "30"
+              value: "35"
             - name: SELKIES_ENCODER
               value: "x264enc"
           resources:
