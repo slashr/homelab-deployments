@@ -171,9 +171,6 @@ data:
     #!/bin/bash
     # Kasm custom startup script - runs after desktop is ready
 
-    # Ensure cron job is installed for workday-keeper
-    /scripts/setup.sh || true
-
     # Ensure cron daemon is available and running (Debian-based images)
     if command -v apt-get >/dev/null 2>&1; then
       apt-get update -y >/dev/null 2>&1 || true
@@ -184,6 +181,9 @@ data:
     elif [ -x /usr/sbin/cron ]; then
       /usr/sbin/cron || true
     fi
+
+    # Ensure cron job is installed for workday-keeper
+    /scripts/setup.sh || true
 
     # Persist Firefox profile to /config (PVC)
     mkdir -p /config/.mozilla
