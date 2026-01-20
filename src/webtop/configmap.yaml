@@ -171,15 +171,25 @@ data:
     #!/bin/bash
     # Kasm custom startup script - runs after desktop is ready
 
-    # Ensure cron daemon is available and running (Debian-based images)
+    # Ensure cron daemon is available and running (requires root)
+    run_root() {
+      if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+      elif command -v sudo >/dev/null 2>&1; then
+        sudo -n "$@" 2>/dev/null || return 1
+      else
+        return 1
+      fi
+    }
+
     if command -v apt-get >/dev/null 2>&1; then
-      apt-get update -y >/dev/null 2>&1 || true
-      apt-get install -y cron >/dev/null 2>&1 || true
+      run_root apt-get update -y >/dev/null 2>&1 || true
+      run_root apt-get install -y cron >/dev/null 2>&1 || true
     fi
     if command -v cron >/dev/null 2>&1; then
-      cron || true
+      run_root cron || true
     elif [ -x /usr/sbin/cron ]; then
-      /usr/sbin/cron || true
+      run_root /usr/sbin/cron || true
     fi
 
     # Ensure cron job is installed for workday-keeper
