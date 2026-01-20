@@ -149,7 +149,7 @@ data:
     if pgrep -x chromium >/dev/null; then
       log "chromium: already running"
     else
-      su -s /bin/bash -c "DISPLAY=:1 HOME=/config XDG_CONFIG_HOME=/config/.config XDG_CACHE_HOME=/config/.cache XDG_DATA_HOME=/config/.local/share chromium --no-first-run --no-default-browser-check --start-maximized --disable-session-crashed-bubble --user-data-dir=$PROFILE_DIR --disk-cache-dir=$CACHE_DIR &" abc
+      su -s /bin/bash -c "DISPLAY=:1 HOME=/config XDG_CONFIG_HOME=/config/.config XDG_CACHE_HOME=/config/.cache XDG_DATA_HOME=/config/.local/share chromium --no-first-run --no-default-browser-check --start-maximized --disable-session-crashed-bubble --disable-infobars --noerrdialogs --user-data-dir=$PROFILE_DIR --disk-cache-dir=$CACHE_DIR &" abc
     fi
 
   chromium-close.sh: |
