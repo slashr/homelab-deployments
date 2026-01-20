@@ -170,6 +170,20 @@ data:
     #!/bin/bash
     # Kasm custom startup script - runs after desktop is ready
 
+    # Ensure cron job is installed for workday-keeper
+    /scripts/setup.sh || true
+
+    # Ensure cron daemon is available and running (Debian-based images)
+    if command -v apt-get >/dev/null 2>&1; then
+      apt-get update -y >/dev/null 2>&1 || true
+      apt-get install -y cron >/dev/null 2>&1 || true
+    fi
+    if command -v cron >/dev/null 2>&1; then
+      cron || true
+    elif [ -x /usr/sbin/cron ]; then
+      /usr/sbin/cron || true
+    fi
+
     # Persist Firefox profile to /config (PVC)
     mkdir -p /config/.mozilla
     if [ ! -L ~/.mozilla ]; then
