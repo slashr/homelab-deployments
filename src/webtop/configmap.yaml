@@ -20,6 +20,8 @@ data:
     crontab -l 2>/dev/null | grep -v workday > /tmp/crontab.tmp || true
     echo "*/3 * * * 1-5 /scripts/workday-keeper.sh" >> /tmp/crontab.tmp
     crontab /tmp/crontab.tmp
+    # Restart cron so it picks up the new crontab
+    s6-svc -r /run/service/svc-cron || true
 
   mmover.sh: |
     #!/bin/bash
