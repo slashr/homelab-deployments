@@ -1,5 +1,9 @@
 FROM ghcr.io/zot24/clawdbot-docker:latest
 
+# Install newer Go (gogcli requires Go 1.21+)
+RUN curl -fsSL https://go.dev/dl/go1.22.10.linux-$(dpkg --print-architecture).tar.gz | tar -C /usr/local -xz
+ENV PATH="/usr/local/go/bin:$PATH"
+
 # Install gog (Google Workspace CLI - Gmail, Calendar, Drive, Contacts, Docs)
 WORKDIR /tmp/gogcli
 RUN git clone https://github.com/steipete/gogcli.git . && \
