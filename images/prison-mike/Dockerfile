@@ -1,4 +1,4 @@
-FROM zot24/clawdbot-docker:latest
+FROM ghcr.io/zot24/clawdbot-docker:latest
 
 # Install gog (Google Workspace CLI - Gmail, Calendar, Drive, Contacts, Docs)
 WORKDIR /tmp/gogcli
