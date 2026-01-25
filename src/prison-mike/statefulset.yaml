@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prison-mike
+  namespace: prison-mike
+spec:
+  selector:
+    matchLabels:
+      app: prison-mike
+  serviceName: prison-mike
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prison-mike
+    spec:
+      # Prefer stanley-arm1 (24GB RAM) or other non-micro nodes
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - stanley-arm1
+                      - jim-pi
+                      - michael-pi
+                      - dwight-pi
+      containers:
+        - name: prison-mike
+          image: dawker/prison-mike:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 18789
+              name: gateway
+          env:
+            - name: CLAWDBOT_GATEWAY_PORT
+              value: "18789"
+          envFrom:
+            - secretRef:
+                name: prison-mike-secrets
+          volumeMounts:
+            - name: config
+              mountPath: /root/.clawdbot
+            - name: workspace
+              mountPath: /root/clawd
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 2Gi
+              cpu: 1000m
+  volumeClaimTemplates:
+    - metadata:
+        name: config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: workspace
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
