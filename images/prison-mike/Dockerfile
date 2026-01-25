@@ -15,7 +15,7 @@ RUN git clone https://github.com/steipete/gogcli.git . && \
 WORKDIR /root
 
 # Install pyicloud (iCloud access - Reminders, Calendar, Notes, Photos, Contacts)
-RUN pip install --no-cache-dir \
+RUN pip install --no-cache-dir --break-system-packages \
     pyicloud==2.2.0 \
     keyring==25.7.0 \
     keyrings.alt==5.0.2 && \
