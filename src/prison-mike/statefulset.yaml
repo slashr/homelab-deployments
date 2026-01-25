@@ -49,9 +49,6 @@ spec:
           env:
             - name: CLAWDBOT_GATEWAY_PORT
               value: "18789"
-          envFrom:
-            - secretRef:
-                name: prison-mike-secrets
           volumeMounts:
             - name: config
               mountPath: /home/node/.clawdbot

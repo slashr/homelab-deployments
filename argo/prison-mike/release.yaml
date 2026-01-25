@@ -18,5 +18,3 @@ spec:
     targetRevision: HEAD
     repoURL: 'https://github.com/slashr/homelab-deployments.git'
     path: src/prison-mike
-    plugin:
-      name: avp-sops
