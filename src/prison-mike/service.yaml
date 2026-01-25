@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prison-mike
+  namespace: prison-mike
+spec:
+  selector:
+    app: prison-mike
+  ports:
+    - port: 18789
+      targetPort: 18789
+      name: gateway
+  type: ClusterIP

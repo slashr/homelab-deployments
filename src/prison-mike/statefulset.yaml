@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prison-mike
+  namespace: prison-mike
+spec:
+  selector:
+    matchLabels:
+      app: prison-mike
+  serviceName: prison-mike
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prison-mike
+    spec:
+      # Run on jim-pi
+      nodeSelector:
+        kubernetes.io/hostname: jim-pi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: prison-mike
+          image: dawker/prison-mike:latest
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 18789
+              name: gateway
+          env:
+            - name: CLAWDBOT_GATEWAY_PORT
+              value: "18789"
+          volumeMounts:
+            - name: config
+              mountPath: /home/node/.clawdbot
+            - name: workspace
+              mountPath: /home/node/clawd
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 2Gi
+              cpu: 1000m
+  volumeClaimTemplates:
+    - metadata:
+        name: config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: workspace
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
