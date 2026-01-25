@@ -14,7 +14,6 @@ Application-specific manifests. Notable subdirectories include:
 - `adguard` – DNS and filtering deployment (ConfigMap, Deployment, PVC,
   Service, Ingress).
 - `dream-home-bot` – Stateful bot workload.
-- `gha-runner` – Self-hosted GitHub Actions runners for the homelab.
 - `homelab-map` – Aggregator, agent, frontend, namespace, and ingress for the
   map UI.
 - `mediaserver` – Media services (for example Plex) manifests.
