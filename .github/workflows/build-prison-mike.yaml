@@ -22,7 +22,7 @@ jobs:
 
       - name: Decrypt registry secrets
         env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_SECRET_KEY }}
         run: |
           echo "$SOPS_AGE_KEY" > /tmp/age-key.txt
           export SOPS_AGE_KEY_FILE=/tmp/age-key.txt
