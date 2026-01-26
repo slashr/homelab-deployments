@@ -40,7 +40,6 @@ spec:
             cpu: "50m"
           limits:
             memory: "64Mi"
-            cpu: "100m"
         volumeMounts:
         - name: cache
           mountPath: /var/cache/nginx

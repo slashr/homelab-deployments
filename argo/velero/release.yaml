@@ -84,7 +84,6 @@ spec:
             cpu: 100m
             memory: 128Mi
           limits:
-            cpu: 500m
             memory: 512Mi
 
         # Disable upgradeCRDs job - broken with k8s 1.35 (image compatibility issues)
@@ -99,7 +98,6 @@ spec:
               cpu: 50m
               memory: 64Mi
             limits:
-              cpu: 200m
               memory: 256Mi
           # Don't run on micro nodes (angela-amd2, pam-amd1)
           affinity:
