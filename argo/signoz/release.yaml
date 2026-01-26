@@ -15,6 +15,11 @@ spec:
     - CreateNamespace=true
     - SkipDryRunOnMissingResource=true
     - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: clickhouse.altinity.com
+      kind: ClickHouseInstallation
+      jsonPointers:
+        - /spec/templates/podTemplates
   project: default
   source:
     targetRevision: '>=0.84.0'
@@ -94,7 +99,25 @@ spec:
                           - stanley-arm1
           persistence:
             size: 30Gi
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
           # Zookeeper runs on jim-pi (chart doesn't expose affinity settings)
           zookeeper:
             persistence:
               size: 2Gi
+
+        # Retention settings - keep logs/traces for 7 days, metrics for 30 days
+        queryService:
+          configVars:
+            storage:
+              logs:
+                ttl_duration_hrs: 168  # 7 days
+              traces:
+                ttl_duration_hrs: 168  # 7 days
+              metrics:
+                ttl_duration_hrs: 720  # 30 days
