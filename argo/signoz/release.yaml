@@ -74,9 +74,9 @@ spec:
           resources:
             requests:
               cpu: 500m
-              memory: 2Gi
-            limits:
               memory: 4Gi
+            limits:
+              memory: 8Gi
           # Pin Zookeeper to stanley-arm1
           zookeeper:
             nodeSelector:
