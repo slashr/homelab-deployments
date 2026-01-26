@@ -102,10 +102,9 @@ spec:
           # Don't run on micro nodes (angela-amd2, pam-amd1)
           affinity:
             nodeAffinity:
-              preferredDuringSchedulingIgnoredDuringExecution:
-                - weight: 100
-                  preference:
-                    matchExpressions:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
                       - key: node-size
                         operator: NotIn
                         values:
