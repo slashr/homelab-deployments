@@ -44,48 +44,6 @@ spec:
                   - signoz.shrub.dev
                 secretName: signoz-tls
 
-          # Pin SigNoz query service to stanley-arm1
-          queryService:
-            affinity:
-              nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                  nodeSelectorTerms:
-                    - matchExpressions:
-                        - key: kubernetes.io/hostname
-                          operator: In
-                          values:
-                            - stanley-arm1
-
-          otelCollector:
-            # Pin central collector to stanley-arm1
-            nodeSelector:
-              kubernetes.io/hostname: stanley-arm1
-              kubernetes.io/os: linux
-            affinity:
-              nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                  nodeSelectorTerms:
-                    - matchExpressions:
-                        - key: kubernetes.io/hostname
-                          operator: In
-                          values:
-                            - stanley-arm1
-            config:
-              receivers:
-                hostmetrics:
-                  collection_interval: 60s
-                  scrapers:
-                    cpu:
-                    memory:
-                    filesystem:
-                    network:
-              service:
-                pipelines:
-                  metrics:
-                    receivers: [otlp, hostmetrics]
-                    processors: [batch]
-                    exporters: [clickhousemetricswrite, metadataexporter, signozclickhousemetrics]
-
         # Disable schema migrator sync hook temporarily
         schemaMigrator:
           enabled: false
@@ -144,8 +102,48 @@ spec:
             processorsProfileLog:
               ttl: 3
 
+        otelCollector:
+          # Pin central collector to stanley-arm1
+          nodeSelector:
+            kubernetes.io/hostname: stanley-arm1
+            kubernetes.io/os: linux
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - stanley-arm1
+          config:
+            receivers:
+              hostmetrics:
+                collection_interval: 60s
+                scrapers:
+                  cpu:
+                  memory:
+                  filesystem:
+                  network:
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp, hostmetrics]
+                  processors: [batch]
+                  exporters: [clickhousemetricswrite, metadataexporter, signozclickhousemetrics]
+
         # Retention settings - keep logs/traces for 7 days, metrics for 30 days
         queryService:
+          # Pin SigNoz query service to stanley-arm1
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - stanley-arm1
           configVars:
             storage:
               logs:
