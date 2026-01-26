@@ -13,6 +13,9 @@ spec:
     metadata:
       labels: { app: actualbudget }
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: stanley-arm1
+        kubernetes.io/os: linux
       containers:
         - name: actualbudget
           image: actualbudget/actual-server:latest

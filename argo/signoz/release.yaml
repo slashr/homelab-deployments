@@ -58,6 +58,9 @@ spec:
 
           otelCollector:
             # Pin central collector to stanley-arm1
+            nodeSelector:
+              kubernetes.io/hostname: stanley-arm1
+              kubernetes.io/os: linux
             affinity:
               nodeAffinity:
                 requiredDuringSchedulingIgnoredDuringExecution:
@@ -125,6 +128,9 @@ spec:
               size: 2Gi
           # System table TTL - keep internal ClickHouse logs for 3 days
           clickhouseOperator:
+            nodeSelector:
+              kubernetes.io/hostname: stanley-arm1
+              kubernetes.io/os: linux
             queryLog:
               ttl: 3
             partLog:
