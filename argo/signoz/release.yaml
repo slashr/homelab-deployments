@@ -110,8 +110,11 @@ spec:
               memory: 2Gi
             limits:
               memory: 4Gi
-          # Zookeeper runs on jim-pi (chart doesn't expose affinity settings)
+          # Pin Zookeeper to stanley-arm1
           zookeeper:
+            nodeSelector:
+              kubernetes.io/hostname: stanley-arm1
+              kubernetes.io/os: linux
             persistence:
               size: 2Gi
           # System table TTL - keep internal ClickHouse logs for 3 days
