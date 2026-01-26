@@ -88,6 +88,11 @@ spec:
           enabled: false
 
         clickhouse:
+          # Fix musl libc DNS resolution issue with ndots:5
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "2"
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
