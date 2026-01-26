@@ -93,6 +93,12 @@ spec:
             options:
               - name: ndots
                 value: "2"
+          initContainers:
+            udf:
+              image:
+                registry: docker.io
+                repository: busybox
+                tag: "1.36"
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
