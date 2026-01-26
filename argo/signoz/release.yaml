@@ -110,21 +110,20 @@ spec:
           zookeeper:
             persistence:
               size: 2Gi
-
-        # System table TTL - keep internal ClickHouse logs for 3 days
-        clickhouseOperator:
-          queryLog:
-            ttl: 3
-          partLog:
-            ttl: 3
-          traceLog:
-            ttl: 3
-          metricLog:
-            ttl: 3
-          asynchronousMetricLog:
-            ttl: 3
-          processorsProfileLog:
-            ttl: 3
+          # System table TTL - keep internal ClickHouse logs for 3 days
+          clickhouseOperator:
+            queryLog:
+              ttl: 3
+            partLog:
+              ttl: 3
+            traceLog:
+              ttl: 3
+            metricLog:
+              ttl: 3
+            asynchronousMetricLog:
+              ttl: 3
+            processorsProfileLog:
+              ttl: 3
 
         # Retention settings - keep logs/traces for 7 days, metrics for 30 days
         queryService:
