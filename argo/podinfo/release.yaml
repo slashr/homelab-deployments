@@ -27,9 +27,20 @@ spec:
           color: "#37891e"
           logo: "https://c.tenor.com/KFWpTDMlfSsAAAAC/tenor.gif"
           message: "🌳🌲🌴🌵🥦"
-        nodeSelector:
-          kubernetes.io/hostname: stanley-arm1
-          kubernetes.io/os: linux
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                preference:
+                  matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: In
+                      values:
+                        - stanley-arm1
+                    - key: kubernetes.io/os
+                      operator: In
+                      values:
+                        - linux
         ingress:
           enabled: true
           annotations:
@@ -43,17 +54,3 @@ spec:
             - hosts:
                 - "hey.shrub.dev"
               secretName: podinfo-tls
-
-          # Run a pod on each of the cluster Nodes
-          affinity:
-            nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                  - matchExpressions:
-                    - key: "name"
-                      operator: In
-                      values:
-                        - "angela"
-                        - "stanley"
-                        - "phyllis"
-                        - "toby"

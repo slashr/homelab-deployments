@@ -13,9 +13,20 @@ spec:
     metadata:
       labels: { app: actualbudget }
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: stanley-arm1
-        kubernetes.io/os: linux
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - stanley-arm1
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
       containers:
         - name: actualbudget
           image: actualbudget/actual-server:latest
