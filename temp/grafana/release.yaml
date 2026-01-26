@@ -48,15 +48,16 @@ spec:
           # Run a pod on each of the cluster Nodes
           affinity:
             nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                  - matchExpressions:
-                    - key: "name"
-                      operator: In
-                      values:
-                        - "jim"
-                        - "michael"
-                        - "angela"
-                        - "stanley"
-                        - "phyllis"
-                        - "toby"
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  preference:
+                    matchExpressions:
+                      - key: "name"
+                        operator: In
+                        values:
+                          - "jim"
+                          - "michael"
+                          - "angela"
+                          - "stanley"
+                          - "phyllis"
+                          - "toby"
