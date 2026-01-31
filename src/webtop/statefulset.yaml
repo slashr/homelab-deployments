@@ -29,13 +29,24 @@ spec:
           - cluster.local
       nodeSelector:
         kubernetes.io/hostname: jim-pi
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        supplementalGroups:
+          - 4
+          - 44
+          - 105
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: webtop
           image: lscr.io/linuxserver/webtop:arm64v8-debian-xfce
           securityContext:
-            seccompProfile:
-              type: Unconfined
-            privileged: true
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ "ALL" ]
+              add: [ "CHOWN", "SETGID", "SETUID", "DAC_OVERRIDE" ]
           lifecycle:
             postStart:
               exec:
@@ -78,8 +89,10 @@ spec:
             requests:
               memory: "1Gi"
               cpu: "250m"
+              squat.ai/dri: "1"
             limits:
               memory: "6Gi"
+              squat.ai/dri: "1"
           readinessProbe:
             httpGet:
               path: /
