@@ -23,7 +23,7 @@ spec:
           effect: NoExecute
       containers:
         - name: generic-device-plugin
-          image: squat/generic-device-plugin:latest
+          image: squat/generic-device-plugin@sha256:ccb0d72edcdf28d2b208e5017cb238e990b6760ccda1cfa2c11fbed181d270ac
           args:
             - --device
             - |
@@ -35,6 +35,9 @@ spec:
                     - path: /dev/dri/card1
           securityContext:
             privileged: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - name: dev-dri
               mountPath: /dev/dri
