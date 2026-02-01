@@ -119,16 +119,16 @@ spec:
 
         # Retention settings - keep logs/traces for 7 days, metrics for 30 days
         queryService:
-          # Pin SigNoz query service to stanley-arm1
+          # Pin SigNoz query service to cloud nodes
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:
                   - matchExpressions:
-                      - key: kubernetes.io/hostname
+                      - key: location
                         operator: In
                         values:
-                          - stanley-arm1
+                          - cloud
           configVars:
             storage:
               logs:
