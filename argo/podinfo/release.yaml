@@ -47,11 +47,11 @@ spec:
           annotations:
             cert-manager.io/cluster-issuer: letsencrypt-prod
           hosts:
-            - host: "hey.shrub.dev"
+            - host: "hey.vind.uk"
               paths:
                 - path: /
                   pathType: ImplementationSpecific
           tls:
             - hosts:
-                - "hey.shrub.dev"
+                - "hey.vind.uk"
               secretName: podinfo-tls
