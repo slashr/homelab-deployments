@@ -34,14 +34,14 @@ spec:
             annotations:
               cert-manager.io/cluster-issuer: letsencrypt-prod
             hosts:
-              - host: signoz.shrub.dev
+              - host: signoz.vind.uk
                 paths:
                   - path: /
                     pathType: ImplementationSpecific
                     port: 8080
             tls:
               - hosts:
-                  - signoz.shrub.dev
+                  - signoz.vind.uk
                 secretName: signoz-tls
 
         # Disable schema migrator sync hook temporarily

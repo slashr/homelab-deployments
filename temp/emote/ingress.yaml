@@ -3,12 +3,12 @@ kind: Ingress
 metadata:
   name: emote
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: emote.shrub.dev
+    external-dns.alpha.kubernetes.io/hostname: emote.vind.uk
     external-dns.alpha.kubernetes.io/target: 130.61.64.164
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: "emote.shrub.dev"
+    - host: "emote.vind.uk"
       http:
         paths:
           - path: /
@@ -20,6 +20,6 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - "emote.shrub.dev"
+        - "emote.vind.uk"
       secretName: emote-tls
 

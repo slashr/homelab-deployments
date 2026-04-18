@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: ynab.shrub.dev
+    - host: ynab.vind.uk
       http:
         paths:
           - path: /
@@ -19,5 +19,5 @@ spec:
                 port:
                   number: 5006
   tls:
-    - hosts: [ynab.shrub.dev]
+    - hosts: [ynab.vind.uk]
       secretName: actualbudget-tls
