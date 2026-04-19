@@ -29,7 +29,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: collect-diagnostics
-              image: docker.io/dawker/kash:f0a393b844f1ac0481696deb6a804ef72e1b2ab2
+              image: docker.io/dawker/kash:54b90d615fbf0dc93c68f42239ec10a70ecf3647
               imagePullPolicy: Always
               command:
                 - python
