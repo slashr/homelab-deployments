@@ -1,0 +1,88 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kash-learning-outcomes
+  namespace: kash
+  labels:
+    app: kash
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: kash
+            job: learning-outcomes
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: sync-outcomes
+              image: docker.io/dawker/kash:3386a7d29c8617de71eea07d30209ac6358d9e8a
+              imagePullPolicy: Always
+              command:
+                - python
+                - -m
+                - kalshi_tools
+                - learn-outcomes
+                - --save
+                - --journal-db
+                - /data/kalshi.sqlite
+                - --limit
+                - "100"
+              env:
+                - name: KALSHI_API_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: kash-secrets
+                      key: KALSHI_API_KEY_ID
+                - name: KALSHI_PRIVATE_KEY_PATH
+                  value: /var/run/kash/private-key.pem
+                - name: KALSHI_BASE_URL
+                  value: https://api.elections.kalshi.com
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                - name: private-key
+                  mountPath: /var/run/kash
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: kash-data
+            - name: private-key
+              secret:
+                secretName: kash-secrets
+                items:
+                  - key: private-key.pem
+                    path: private-key.pem
+                    mode: 0400
+            - name: tmp
+              emptyDir:
+                sizeLimit: 128Mi
