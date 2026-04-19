@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kash
+  namespace: kash
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: kash
+      port:
+        number: 8765
+  tls:
+    - hosts:
+        - kash

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kash
+  namespace: kash
+  labels:
+    app: kash
+spec:
+  type: ClusterIP
+  selector:
+    app: kash
+  ports:
+    - name: http
+      port: 8765
+      targetPort: http
+      protocol: TCP
