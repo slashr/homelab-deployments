@@ -35,10 +35,10 @@ spec:
                 - python
                 - -m
                 - kalshi_tools
-                - learn-outcomes
-                - --save
                 - --journal-db
                 - /data/kalshi.sqlite
+                - learn-outcomes
+                - --save
                 - --limit
                 - "100"
               env:
