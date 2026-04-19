@@ -18,3 +18,5 @@ spec:
     targetRevision: HEAD
     repoURL: 'https://github.com/slashr/homelab-deployments.git'
     path: src/kash
+    plugin:
+      name: avp-sops
