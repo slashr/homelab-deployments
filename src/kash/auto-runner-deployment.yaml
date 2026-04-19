@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: auto-runner
-          image: docker.io/dawker/kash:54b90d615fbf0dc93c68f42239ec10a70ecf3647
+          image: docker.io/dawker/kash:936db5d65b129b513c6dfa4758416b7b0e2cea15
           imagePullPolicy: Always
           command:
             - python
