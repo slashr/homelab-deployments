@@ -16,7 +16,7 @@ spec:
       template:
         metadata:
           labels:
-            app: kash
+            app: kash-learning-outcomes
             job: learning-outcomes
         spec:
           restartPolicy: Never
