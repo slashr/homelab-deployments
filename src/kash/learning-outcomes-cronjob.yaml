@@ -29,7 +29,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: sync-outcomes
-              image: docker.io/dawker/kash:4546d7cba2ae2968ead6657150156a375bf74ef9
+              image: docker.io/dawker/kash:e4811ecc312c7266f8ada63a3e98d33b80dc82cc
               imagePullPolicy: Always
               command:
                 - python
