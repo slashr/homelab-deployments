@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: kash
-          image: docker.io/dawker/kash:896593e42abe47e2db82565e7108e3a26c149e75
+          image: docker.io/dawker/kash:ff1ce779f2930ada77d487884c6d3145b3ee8992
           imagePullPolicy: Always
           ports:
             - name: http
