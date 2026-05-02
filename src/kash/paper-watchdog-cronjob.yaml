@@ -32,7 +32,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: paper-watchdog
-              image: docker.io/dawker/kash:7d7f5815aab9b1f902bac6f1587b77cc018e03d8
+              image: docker.io/dawker/kash:26ae3b73adfd6d889962f38961fbe7ad33410664
               imagePullPolicy: Always
               command:
                 - /bin/sh
