@@ -1,0 +1,126 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kash-paper-watchdog
+  namespace: kash
+  labels:
+    app: kash
+    component: paper-watchdog
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: kash
+            component: paper-watchdog
+            job: paper-watchdog
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: paper-watchdog
+              image: docker.io/dawker/kash:936db5d65b129b513c6dfa4758416b7b0e2cea15
+              imagePullPolicy: Always
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  if python -m kalshi_tools --help | grep -q 'paper-watchdog'; then
+                    exec python -m kalshi_tools \
+                      --journal-db /data/kalshi.sqlite \
+                      paper-watchdog \
+                      --source-file data/watchlist-sources.csv \
+                      --families tennis,soccer,combat,nba,nhl \
+                      --hours 1440 \
+                      --include-source-types sportsbook_no_vig,sportsbook_position_total \
+                      --min-tradable-probability 0.55 \
+                      --min-net-edge 0.05 \
+                      --min-ask 0.4 \
+                      --max-ask 0.499999 \
+                      --cycles 1 \
+                      --experiment-id watchlist-edge-001 \
+                      --target-win-rate 0.55 \
+                      --min-settled 20 \
+                      --min-wilson-lower 0.45 \
+                      --min-clv-age-hours 1 \
+                      --source-audit-max-odds-age-hours 12 \
+                      --notes "k3s paper-only sportsbook mid-price evidence collection"
+                  fi
+
+                  python -m kalshi_tools \
+                    --journal-db /data/kalshi.sqlite \
+                    evaluate-watchlist \
+                    --source-file data/watchlist-sources.csv \
+                    --families tennis,soccer,combat,nba,nhl \
+                    --hours 1440 \
+                    --include-source-types sportsbook_no_vig,sportsbook_position_total \
+                    --min-tradable-probability 0.55 \
+                    --min-net-edge 0.05 \
+                    --min-ask 0.4 \
+                    --max-ask 0.499999 \
+                    --save \
+                    --experiment-id watchlist-edge-001 \
+                    --notes "k3s paper-only sportsbook mid-price evidence collection fallback"
+
+                  python -m kalshi_tools \
+                    --journal-db /data/kalshi.sqlite \
+                    clv-watchlist \
+                    --limit 25 \
+                    --save || true
+              env:
+                - name: KALSHI_API_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: kash-secrets
+                      key: KALSHI_API_KEY_ID
+                - name: KALSHI_PRIVATE_KEY_PATH
+                  value: /var/run/kash/private-key.pem
+                - name: KALSHI_BASE_URL
+                  value: https://api.elections.kalshi.com
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                - name: private-key
+                  mountPath: /var/run/kash
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: kash-data
+            - name: private-key
+              secret:
+                secretName: kash-secrets
+                items:
+                  - key: private-key.pem
+                    path: private-key.pem
+                    mode: 0400
+            - name: tmp
+              emptyDir:
+                sizeLimit: 128Mi
