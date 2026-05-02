@@ -8,7 +8,7 @@ metadata:
     component: paper-watchdog
 spec:
   schedule: "*/30 * * * *"
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
