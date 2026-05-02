@@ -5,7 +5,11 @@ jobs.
 
 ## Paper Watchdog
 
-`paper-watchdog-cronjob.yaml` runs one paper collection cycle every 30 minutes.
+`paper-watchdog-cronjob.yaml` is the intended always-on paper collection job.
+It is currently suspended until the deployed kash image contains the watchlist
+screening commands needed by this lane. Once the image is updated, unsuspend it
+to run one paper collection cycle every 30 minutes.
+
 On images that include `paper-watchdog`, it records paper observations, paper
 outcomes, and CLV snapshots into the shared `kash-data` SQLite volume. On older
 images, it falls back to `evaluate-watchlist --save` plus `clv-watchlist --save`
