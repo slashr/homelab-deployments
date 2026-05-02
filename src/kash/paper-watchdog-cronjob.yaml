@@ -57,6 +57,8 @@ spec:
                       --min-wilson-lower 0.45 \
                       --min-clv-age-hours 1 \
                       --source-audit-max-odds-age-hours 12 \
+                      --save-rejections \
+                      --save-rejection-limit 10 \
                       --notes "k3s paper-only sportsbook mid-price evidence collection"
                   fi
 

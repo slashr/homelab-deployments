@@ -8,11 +8,13 @@ jobs.
 `paper-watchdog-cronjob.yaml` is the intended always-on paper collection job.
 It runs one paper collection cycle every 30 minutes.
 
-On images that include `paper-watchdog`, it records paper observations, paper
-outcomes, and CLV snapshots into the shared `kash-data` SQLite volume. On older
-images, it falls back to `evaluate-watchlist --save` plus `clv-watchlist --save`
-so evidence collection can start before the next kash image rollout. It does not
-pass `--execute`, and neither path exposes an order-execution switch.
+On images that include `paper-watchdog`, it records paper observations, bounded
+rejection diagnostics, paper outcomes, and CLV snapshots into the shared
+`kash-data` SQLite volume. Diagnostic rejections are for Paper Ops visibility and
+do not count as readiness evidence. On older images, it falls back to
+`evaluate-watchlist --save` plus `clv-watchlist --save` so evidence collection
+can start before the next kash image rollout. It does not pass `--execute`, and
+neither path exposes an order-execution switch.
 
 The CronJob intentionally matches the current evidence lane:
 
