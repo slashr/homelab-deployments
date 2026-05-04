@@ -63,9 +63,12 @@ spec:
           existingSecret: velero-s3-credentials
 
         # Daily backup schedule for stateful applications
+        # Paused 2026-05-04: Oracle started billing Object Storage requests from
+        # Kopia/Velero. Re-enable only after moving backups off OCI or accepting
+        # the request charges.
         schedules:
           daily-backup:
-            disabled: false
+            disabled: true
             schedule: "0 3 * * *"  # 3am UTC daily
             template:
               ttl: "720h"  # 30 days retention
