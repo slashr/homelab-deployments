@@ -22,7 +22,7 @@ spec:
         - /spec/templates/podTemplates
   project: default
   source:
-    targetRevision: '>=0.84.0'
+    targetRevision: 0.120.0
     repoURL: 'https://charts.signoz.io'
     chart: signoz
     helm:
@@ -47,6 +47,11 @@ spec:
         # Disable schema migrator sync hook temporarily
         schemaMigrator:
           enabled: false
+
+        telemetryStoreMigrator:
+          nodeSelector:
+            kubernetes.io/hostname: stanley-arm1
+            kubernetes.io/os: linux
 
         clickhouse:
           # Fix musl libc DNS resolution issue with ndots:5

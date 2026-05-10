@@ -21,7 +21,7 @@ spec:
     helm:
       values: |
         clusterName: shrub-dev
-        otelCollectorEndpoint: signoz-otel-collector.signoz.svc.cluster.local:4317
+        otelCollectorEndpoint: 100.100.2.103:31317
         otelInsecure: true
         otelAgent: {}
         otelDeployment:
